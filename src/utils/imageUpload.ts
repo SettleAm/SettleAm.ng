@@ -1,5 +1,4 @@
 import imageCompression from "browser-image-compression";
-import { supabase } from "./supabase";
 
 /** Target compressed size in MB (~250 KB) */
 const TARGET_SIZE_MB = 0.24;
@@ -7,9 +6,8 @@ const TARGET_SIZE_MB = 0.24;
 /** Max dimension (width or height) after resize */
 const MAX_DIMENSION_PX = 1920;
 
-// ── Bucket names (must match what you created in Supabase Storage) ──────────
-const PORTFOLIO_BUCKET = "portfolio-images";
-const PROFILE_BUCKET   = "profile-images";
+const CLOUDINARY_CLOUD_NAME = "do4kkjsgg";
+const CLOUDINARY_UPLOAD_PRESET = "settleam_unsigned";
 
 export interface UploadProgress {
   fileName: string;
@@ -31,7 +29,6 @@ export async function compressImage(file: File): Promise<File> {
     useWebWorker: true,
     fileType: file.type === "image/png" ? "image/png" : "image/jpeg",
     initialQuality: 0.85,
-    // Ensure we don't enlarge small images
     alwaysKeepResolution: false,
   };
 
@@ -42,8 +39,16 @@ export async function compressImage(file: File): Promise<File> {
 }
 
 /**
- * Compress + upload a portfolio image to Supabase Storage.
- * Returns the public URL of the stored image.
+ * Helper to inject Cloudinary optimization transformations (f_auto, q_auto)
+ */
+export function optimizeCloudinaryUrl(url: string): string {
+  if (!url || !url.includes("cloudinary.com")) return url;
+  return url.replace("/upload/", "/upload/f_auto,q_auto/");
+}
+
+/**
+ * Compress + upload a portfolio image to Cloudinary.
+ * Returns the optimized URL of the stored image.
  */
 export async function uploadPortfolioImage(
   file: File,
@@ -71,39 +76,42 @@ export async function uploadPortfolioImage(
   const compressedSizeKB = Math.round(compressed.size / 1024);
   onProgress?.({ ...baseProgress, stage: "uploading", compressedSizeKB });
 
-  // 2. Upload to Supabase Storage  → "portfolio-images" bucket
-  const ext = compressed.type === "image/png" ? "png" : "jpg";
-  const timestamp = Date.now();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const storagePath = `${userId}/${timestamp}-${safeName}.${ext}`;
+  // 2. Upload to Cloudinary using unsigned upload
+  try {
+    const formData = new FormData();
+    formData.append("file", compressed);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("tags", `portfolio,user-${userId}`);
 
-  const { error: uploadError } = await supabase.storage
-    .from(PORTFOLIO_BUCKET)
-    .upload(storagePath, compressed, {
-      contentType: compressed.type,
-      upsert: false,
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: "POST",
+      body: formData,
     });
 
-  if (uploadError) {
-    onProgress?.({ ...baseProgress, stage: "error", error: uploadError.message });
-    throw new Error(`Upload failed: ${uploadError.message}`);
+    if (!res.ok) {
+      const errData = await res.json();
+      // Log full error so it's visible in browser DevTools Console
+      console.error("[Cloudinary] Upload failed (portfolio). Status:", res.status, "Body:", errData);
+      const msg = errData.error?.message || `Cloudinary upload failed (HTTP ${res.status})`;
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+    const rawUrl = data.secure_url;
+    const url = optimizeCloudinaryUrl(rawUrl);
+
+    onProgress?.({ ...baseProgress, stage: "done", compressedSizeKB, url });
+
+    return url;
+  } catch (err: any) {
+    onProgress?.({ ...baseProgress, stage: "error", error: err.message });
+    throw err;
   }
-
-  // 3. Get public URL
-  const { data } = supabase.storage
-    .from(PORTFOLIO_BUCKET)
-    .getPublicUrl(storagePath);
-
-  const url = data.publicUrl;
-  onProgress?.({ ...baseProgress, stage: "done", compressedSizeKB, url });
-
-  return url;
 }
 
 /**
- * Compress + upload a profile avatar image to Supabase Storage.
- * Overwrites any existing avatar for this user.
- * Returns the public URL.
+ * Compress + upload a profile avatar image to Cloudinary.
+ * Returns the optimized URL.
  */
 export async function uploadProfileImage(
   file: File,
@@ -138,49 +146,45 @@ export async function uploadProfileImage(
   const compressedSizeKB = Math.round(compressed.size / 1024);
   onProgress?.({ ...baseProgress, stage: "uploading", compressedSizeKB });
 
-  // 2. Upload → "profile-images" bucket, overwrite existing avatar
-  const storagePath = `${userId}/avatar.jpg`;
+  // 2. Upload to Cloudinary using unsigned upload
+  try {
+    const formData = new FormData();
+    formData.append("file", compressed);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("tags", `avatar,user-${userId}`);
 
-  const { error: uploadError } = await supabase.storage
-    .from(PROFILE_BUCKET)
-    .upload(storagePath, compressed, {
-      contentType: "image/jpeg",
-      upsert: true, // overwrite previous avatar
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: "POST",
+      body: formData,
     });
 
-  if (uploadError) {
-    onProgress?.({ ...baseProgress, stage: "error", error: uploadError.message });
-    throw new Error(`Upload failed: ${uploadError.message}`);
+    if (!res.ok) {
+      const errData = await res.json();
+      // Log full error so it's visible in browser DevTools Console
+      console.error("[Cloudinary] Upload failed (avatar). Status:", res.status, "Body:", errData);
+      const msg = errData.error?.message || `Cloudinary upload failed (HTTP ${res.status})`;
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+    const rawUrl = data.secure_url;
+    const url = optimizeCloudinaryUrl(rawUrl);
+
+    onProgress?.({ ...baseProgress, stage: "done", compressedSizeKB, url });
+
+    return url;
+  } catch (err: any) {
+    onProgress?.({ ...baseProgress, stage: "error", error: err.message });
+    throw err;
   }
-
-  // 3. Get public URL (cache-busting so browser picks up the latest)
-  const { data } = supabase.storage
-    .from(PROFILE_BUCKET)
-    .getPublicUrl(storagePath);
-
-  const url = `${data.publicUrl}?t=${Date.now()}`;
-  onProgress?.({ ...baseProgress, stage: "done", compressedSizeKB, url });
-
-  return url;
 }
 
 /**
- * Delete an image from Supabase Storage given its full public URL.
+ * Delete an image. Frontend client calls cannot delete resources in Cloudinary directly 
+ * without exposing API secrets, which is unsafe. This is kept as a placeholder to match
+ * the original interface signature, but skips the action gracefully.
  */
 export async function deleteStorageImage(publicUrl: string): Promise<void> {
-  try {
-    // Detect which bucket the URL belongs to and extract the path
-    for (const bucket of [PORTFOLIO_BUCKET, PROFILE_BUCKET]) {
-      const marker = `/${bucket}/`;
-      const idx = publicUrl.indexOf(marker);
-      if (idx !== -1) {
-        const storagePath = publicUrl.slice(idx + marker.length).split("?")[0];
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return;
-      }
-    }
-    // Not a recognised storage URL — skip silently
-  } catch {
-    // Non-critical — don't block the UI
-  }
+  // Skipped silently on frontend for security
+  console.log("Cloudinary image deletion skipped on client side:", publicUrl);
 }

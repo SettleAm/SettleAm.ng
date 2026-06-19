@@ -34,32 +34,6 @@ export default function Hero() {
           <span>🔧</span> Browse Services
         </Link>
       </div>
-      <div className="hero-stats">
-        <div className="stat-item">
-          <div className="stat-num">39M+</div>
-          <div className="stat-label">
-            Nigerian households need
-            <br />
-            repair services
-          </div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-num">10%</div>
-          <div className="stat-label">
-            Transparent commission —
-            <br />
-            no hidden fees
-          </div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-num">24hr</div>
-          <div className="stat-label">
-            Dispute protection
-            <br />
-            on every job
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

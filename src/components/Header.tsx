@@ -64,6 +64,17 @@ export default function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // ── Lock body scroll when mobile overlay is open ──────────────────────────
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
+
+
   // ── Dynamic CSS class list ────────────────────────────────────────────────
   const headerClass = [
     "app-header",
@@ -104,15 +115,47 @@ export default function Header({
     </div>
   );
 
-  // ── Landing nav links ─────────────────────────────────────────────────────
+  // ── Landing nav links (desktop) ───────────────────────────────────────────
   const landingLinks = isLanding && (
-    <ul className={`app-header__menu${mobileMenuOpen ? " app-header__menu--open" : ""}`} role="list">
-      <li><Link href="/artisans"   className="app-header__link" onClick={() => setMobileMenuOpen(false)}>Services</Link></li>
-      <li><Link href="#how"        className="app-header__link" onClick={() => setMobileMenuOpen(false)}>How it Works</Link></li>
-      <li><Link href="#verify"     className="app-header__link" onClick={() => setMobileMenuOpen(false)}>Trust &amp; Safety</Link></li>
-      <li><Link href="/login"      className="app-header__link app-header__link--login" onClick={() => setMobileMenuOpen(false)}>Login</Link></li>
-      <li><Link href="#booking"    className="app-header__link app-header__link--cta"   onClick={() => setMobileMenuOpen(false)}>Book Now</Link></li>
+    <ul className="app-header__menu" role="list">
+      <li><Link href="/artisans"   className="app-header__link">Services</Link></li>
+      <li><Link href="#how"        className="app-header__link">How it Works</Link></li>
+      <li><Link href="#verify"     className="app-header__link">Trust &amp; Safety</Link></li>
+      <li><Link href="/login"      className="app-header__link app-header__link--login">Login</Link></li>
+      <li><Link href="#booking"    className="app-header__link app-header__link--cta">Book Now</Link></li>
     </ul>
+  );
+
+  // ── Mobile full-screen overlay (landing only) ─────────────────────────────
+  const mobileOverlay = isLanding && mobileMenuOpen && (
+    <div className="app-header__mobile-overlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      {/* Overlay top bar */}
+      <div className="app-header__mobile-topbar">
+        <Link href="/" className="app-header__logo" aria-label="SettleAm Home" onClick={() => setMobileMenuOpen(false)}>
+          <img src="/SettleAm logo/SettleAm_logo_light.svg" alt="SettleAm" className="app-header__logo-img" />
+        </Link>
+        <button
+          className="app-header__mobile-close"
+          aria-label="Close menu"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Nav links */}
+      <div className="app-header__mobile-nav">
+        <Link href="/artisans" className="app-header__mobile-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
+        <Link href="#how"      className="app-header__mobile-link" onClick={() => setMobileMenuOpen(false)}>How it Works</Link>
+        <Link href="#verify"   className="app-header__mobile-link" onClick={() => setMobileMenuOpen(false)}>Trust &amp; Safety</Link>
+      </div>
+
+      {/* CTA buttons */}
+      <div className="app-header__mobile-actions">
+        <Link href="#booking" className="app-header__mobile-btn app-header__mobile-btn--primary" onClick={() => setMobileMenuOpen(false)}>Book Now</Link>
+        <Link href="/login"   className="app-header__mobile-btn app-header__mobile-btn--secondary" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+      </div>
+    </div>
   );
 
   // ── App nav links (directory) ─────────────────────────────────────────────
@@ -120,7 +163,7 @@ export default function Header({
     <div className="app-header__actions">
       <Link href="/"        className="app-header__action-link">Dashboard</Link>
       <Link href="/artisans" className="app-header__action-link">My Bookings</Link>
-      <Link href="/artisans" className="app-header__action-btn">+ Book Now</Link>
+      <Link href="/book"     className="app-header__action-btn">+ Book Now</Link>
     </div>
   );
 
@@ -155,15 +198,18 @@ export default function Header({
   );
 
   return (
-    <header className={headerClass} role="banner">
-      <div className="app-header__inner">
-        {logo}
-        {searchBar}
-        {landingLinks}
-        {appLinks}
-        {simpleRight}
-        {hamburger}
-      </div>
-    </header>
+    <>
+      <header className={headerClass} role="banner">
+        <div className="app-header__inner">
+          {logo}
+          {searchBar}
+          {landingLinks}
+          {appLinks}
+          {simpleRight}
+          {hamburger}
+        </div>
+      </header>
+      {mobileOverlay}
+    </>
   );
 }

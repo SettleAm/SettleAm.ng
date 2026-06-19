@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ARTISANS } from "../page";
@@ -41,11 +41,63 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
   const idStr = resolvedParams.id;
   const [artisan, setArtisan] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [zoomedIndex, setZoomedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (zoomedIndex === null) return;
+    const portfolioLength = artisan?.portfolio?.length || 0;
+    if (portfolioLength === 0) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setZoomedIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : portfolioLength - 1));
+      } else if (e.key === "ArrowRight") {
+        setZoomedIndex((prev) => (prev !== null && prev < portfolioLength - 1 ? prev + 1 : 0));
+      } else if (e.key === "Escape") {
+        setZoomedIndex(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [zoomedIndex, artisan?.portfolio]);
+
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (zoomedIndex === null) return;
+    const portfolioLength = artisan?.portfolio?.length || 0;
+    setZoomedIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : portfolioLength - 1));
+  };
+
+  const handleNext = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (zoomedIndex === null) return;
+    const portfolioLength = artisan?.portfolio?.length || 0;
+    setZoomedIndex((prev) => (prev !== null && prev < portfolioLength - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchArtisan() {
       try {
-        if (idStr.startsWith("custom-")) {
+        const parsedId = parseInt(idStr, 10);
+        if (idStr.startsWith("custom-") || isNaN(parsedId)) {
           const rawId = idStr.replace("custom-", "");
           const profile = await profileService.getProfile(rawId);
           if (profile) {
@@ -61,6 +113,7 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
               Chef: "👨‍🍳",
               Painter: "🖌️",
               Driver: "🚗",
+              "Shoe Maker": "👞",
             };
             const tradeEmoji = emojiMap[profile.craft] || "🛠️";
             
@@ -89,7 +142,6 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
           }
         } else {
           // Parse static artisan
-          const parsedId = parseInt(idStr, 10);
           const staticArtisan = ARTISANS.find((a) => a.id === parsedId);
           if (staticArtisan) {
             setArtisan({
@@ -210,9 +262,41 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
         
         /* Portfolio Grid */
         .prof-portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
-        .prof-portfolio-item { aspect-ratio: 1; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--border); transition: transform 0.2s; }
-        .prof-portfolio-item:hover { transform: scale(1.03); }
+        .prof-portfolio-item { aspect-ratio: 1; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--border); transition: all 0.25s ease; cursor: pointer; }
+        .prof-portfolio-item:hover { transform: scale(1.04); box-shadow: 0 10px 20px rgba(14,107,69,0.12); filter: brightness(1.05); }
         .prof-portfolio-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Lightbox Portfolio Zoom */
+        .lightbox-overlay {
+          position: fixed; inset: 0; background: rgba(6, 15, 10, 0.92);
+          backdrop-filter: blur(12px); z-index: 9999; display: flex;
+          align-items: center; justify-content: center; animation: fadeInLightbox 0.25s ease-out;
+          cursor: zoom-out;
+        }
+        .lightbox-content {
+          max-width: 90vw; max-height: 85vh; position: relative;
+          display: flex; align-items: center; justify-content: center;
+          animation: zoomInLightbox 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          cursor: default;
+        }
+        .lightbox-content img {
+          max-width: 100%; max-height: 80vh; object-fit: contain;
+          border-radius: 20px; border: 2px solid rgba(200, 232, 212, 0.15);
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+        }
+        .lightbox-close {
+          position: absolute; top: 24px; right: 24px;
+          background: rgba(250, 255, 248, 0.08); color: #fff;
+          border: 1.5px solid rgba(200, 232, 212, 0.15); border-radius: 50%;
+          width: 46px; height: 46px; font-size: 1.1rem; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          transition: all 0.2s; z-index: 10000;
+        }
+        .lightbox-close:hover {
+          background: rgba(250, 255, 248, 0.18); transform: scale(1.05);
+        }
+        @keyframes fadeInLightbox { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomInLightbox { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         /* Reviews list */
         .reviews-list { display: flex; flex-direction: column; gap: 20px; }
@@ -328,7 +412,7 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
                 <h3>Portfolio Showcase</h3>
                 <div className="prof-portfolio-grid">
                   {artisan.portfolio.map((img: string, idx: number) => (
-                    <div className="prof-portfolio-item" key={idx}>
+                    <div className="prof-portfolio-item" key={idx} onClick={() => setZoomedIndex(idx)}>
                       <img src={img} alt={`Work project ${idx + 1}`} />
                     </div>
                   ))}
@@ -391,6 +475,34 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
       </div>
 
       <Footer />
+
+      {/* Lightbox Overlay */}
+      {zoomedIndex !== null && artisan.portfolio && artisan.portfolio[zoomedIndex] && (
+        <div
+          className="lightbox-overlay"
+          onClick={() => setZoomedIndex(null)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <button className="lightbox-close" onClick={() => setZoomedIndex(null)} aria-label="Close viewer">✕</button>
+          
+          {artisan.portfolio.length > 1 && (
+            <>
+              <button className="lightbox-nav lightbox-nav--prev" onClick={handlePrev} aria-label="Previous image">‹</button>
+              <button className="lightbox-nav lightbox-nav--next" onClick={handleNext} aria-label="Next image">›</button>
+            </>
+          )}
+
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img src={artisan.portfolio[zoomedIndex]} alt="Zoomed portfolio showcase" />
+            {artisan.portfolio.length > 1 && (
+              <div className="lightbox-indicator">
+                {zoomedIndex + 1} / {artisan.portfolio.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

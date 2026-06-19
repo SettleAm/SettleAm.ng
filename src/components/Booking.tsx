@@ -80,6 +80,7 @@ export default function Booking() {
                 <option value="TV Installation">TV Installation</option>
                 <option value="Driver">Driver</option>
                 <option value="Tailor / Suit Maker">Tailor / Suit Maker</option>
+                <option value="Shoe Maker">Shoe Maker</option>
                 <option value="Hair Stylist">Hair Stylist</option>
                 <option value="Chef / Caterer">Chef / Caterer</option>
                 <option value="Other">Other</option>

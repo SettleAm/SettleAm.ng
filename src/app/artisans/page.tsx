@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Footer from "../../components/Footer";
@@ -9,170 +9,7 @@ import { profileService } from "../../utils/profileService";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
-export const ARTISANS = [
-  {
-    id: 1,
-    initials: "AO",
-    name: "Adewale Okonkwo",
-    trade: "Electrician",
-    tradeEmoji: "⚡",
-    experience: "4 yrs exp",
-    rating: 4.9,
-    reviews: 38,
-    skills: ["Wiring", "Installations", "Repairs", "Generator"],
-    location: "Sagamu",
-    distance: "2.4km",
-    price: "₦8,000",
-    available: true,
-    featured: true,
-    avatarClass: "a1",
-    bandClass: "b1",
-  },
-  {
-    id: 2,
-    initials: "SI",
-    name: "Suleiman Ibrahim",
-    trade: "Plumber",
-    tradeEmoji: "🔧",
-    experience: "6 yrs exp",
-    rating: 4.8,
-    reviews: 52,
-    skills: ["Pipe Repairs", "Borehole", "Tap Fitting"],
-    location: "Abeokuta",
-    distance: "1.1km",
-    price: "₦6,500",
-    available: true,
-    featured: false,
-    avatarClass: "a2",
-    bandClass: "b2",
-  },
-  {
-    id: 3,
-    initials: "FK",
-    name: "Funke Kolawole",
-    trade: "Tailor",
-    tradeEmoji: "✂️",
-    experience: "8 yrs exp",
-    rating: 5.0,
-    reviews: 91,
-    skills: ["Agbada", "Senator", "Gown", "Alterations"],
-    location: "Abeokuta",
-    distance: "0.6km",
-    price: "₦5,000",
-    available: true,
-    featured: false,
-    avatarClass: "a3",
-    bandClass: "b3",
-  },
-  {
-    id: 4,
-    initials: "EM",
-    name: "Emmanuel Musa",
-    trade: "AC Tech",
-    tradeEmoji: "❄️",
-    experience: "5 yrs exp",
-    rating: 4.7,
-    reviews: 27,
-    skills: ["Installation", "Servicing", "Gas Refill"],
-    location: "Ijebu-Ode",
-    distance: "4.2km",
-    price: "₦10,000",
-    available: false,
-    featured: false,
-    avatarClass: "a4",
-    bandClass: "b4",
-  },
-  {
-    id: 5,
-    initials: "RB",
-    name: "Rasheed Badmus",
-    trade: "Carpenter",
-    tradeEmoji: "🪚",
-    experience: "10 yrs exp",
-    rating: 4.9,
-    reviews: 63,
-    skills: ["Furniture", "Wardrobes", "Doors", "Roofing"],
-    location: "Sagamu",
-    distance: "3.0km",
-    price: "₦12,000",
-    available: true,
-    featured: false,
-    avatarClass: "a5",
-    bandClass: "b5",
-  },
-  {
-    id: 6,
-    initials: "AT",
-    name: "Amaka Taiwo",
-    trade: "Cleaner",
-    tradeEmoji: "🧹",
-    experience: "3 yrs exp",
-    rating: 4.8,
-    reviews: 44,
-    skills: ["Deep Clean", "Post-Event", "Office"],
-    location: "Abeokuta",
-    distance: "0.8km",
-    price: "₦4,000",
-    available: true,
-    featured: false,
-    avatarClass: "a6",
-    bandClass: "b6",
-  },
-  {
-    id: 7,
-    initials: "BO",
-    name: "Blessing Okafor",
-    trade: "Hair Stylist",
-    tradeEmoji: "💇",
-    experience: "7 yrs exp",
-    rating: 5.0,
-    reviews: 118,
-    skills: ["Braiding", "Locs", "Weaves", "Natural"],
-    location: "Abeokuta",
-    distance: "1.5km",
-    price: "₦3,500",
-    available: true,
-    featured: false,
-    avatarClass: "a7",
-    bandClass: "b7",
-  },
-  {
-    id: 8,
-    initials: "CE",
-    name: "Chukwudi Eze",
-    trade: "Chef",
-    tradeEmoji: "👨‍🍳",
-    experience: "9 yrs exp",
-    rating: 4.6,
-    reviews: 35,
-    skills: ["Events", "Nigerian", "Continental"],
-    location: "Sagamu",
-    distance: "5.1km",
-    price: "₦15,000",
-    available: false,
-    featured: false,
-    avatarClass: "a8",
-    bandClass: "b8",
-  },
-  {
-    id: 9,
-    initials: "TA",
-    name: "Taiwo Adebisi",
-    trade: "Painter",
-    tradeEmoji: "🖌️",
-    experience: "6 yrs exp",
-    rating: 4.7,
-    reviews: 29,
-    skills: ["Interior", "Exterior", "Texture", "POP"],
-    location: "Ijebu-Ode",
-    distance: "6.3km",
-    price: "₦7,500",
-    available: true,
-    featured: false,
-    avatarClass: "a9",
-    bandClass: "b9",
-  },
-];
+export const ARTISANS: any[] = [];
 
 const TABS = [
   { label: "All Artisans", value: "All", count: 247 },
@@ -185,6 +22,7 @@ const TABS = [
   { label: "Chefs", value: "Chef", emoji: "👨‍🍳", count: 7 },
   { label: "Painters", value: "Painter", emoji: "🖌️", count: 11 },
   { label: "Drivers", value: "Driver", emoji: "🚗", count: 22 },
+  { label: "Shoe Makers", value: "Shoe Maker", emoji: "👞", count: 14 },
 ];
 
 function renderStars(rating: number) {
@@ -314,6 +152,7 @@ function FilterControls({
   selectedExperience,
   setSelectedExperience,
   onClearAll,
+  allArtisans = [],
 }: {
   locationSearch: string;
   setLocationSearch: (val: string) => void;
@@ -325,6 +164,7 @@ function FilterControls({
   selectedExperience: string[];
   setSelectedExperience: (val: string[]) => void;
   onClearAll: () => void;
+  allArtisans?: any[];
 }) {
   const toggleAvailability = (val: string) => {
     if (selectedAvailability.includes(val)) {
@@ -340,6 +180,21 @@ function FilterControls({
     } else {
       setSelectedExperience([...selectedExperience, val]);
     }
+  };
+
+  const getAvailabilityCount = (label: string) => {
+    // Only "Available now" matches 'available: true'. Others are simplified to show the same or similar.
+    return allArtisans.filter(a => a.available).length;
+  };
+
+  const getExperienceCount = (label: string) => {
+    return allArtisans.filter(a => {
+      const yrs = parseInt(a.experience.replace(/[^\d]/g, ""), 10) || 0;
+      if (label === "1–3 years") return yrs >= 1 && yrs <= 3;
+      if (label === "3–6 years") return yrs >= 3 && yrs <= 6;
+      if (label === "6+ years") return yrs >= 6;
+      return true;
+    }).length;
   };
 
   return (
@@ -391,9 +246,9 @@ function FilterControls({
         <div className="filter-label">🕐 Availability</div>
         <div className="checkbox-list">
           {[
-            { label: "Available now", count: 143 },
-            { label: "Available today", count: 198 },
-            { label: "Emergency / same day", count: 67 },
+            { label: "Available now" },
+            { label: "Available today" },
+            { label: "Emergency / same day" },
           ].map((item) => (
             <label key={item.label} className="checkbox-item">
               <input
@@ -403,7 +258,7 @@ function FilterControls({
               />
               <div className="custom-cb" />
               {item.label}
-              <span className="cb-count">{item.count}</span>
+              <span className="cb-count">{getAvailabilityCount(item.label)}</span>
             </label>
           ))}
         </div>
@@ -413,9 +268,9 @@ function FilterControls({
         <div className="filter-label">📏 Experience</div>
         <div className="checkbox-list">
           {[
-            { label: "1–3 years", count: 78 },
-            { label: "3–6 years", count: 102 },
-            { label: "6+ years", count: 67 },
+            { label: "1–3 years" },
+            { label: "3–6 years" },
+            { label: "6+ years" },
           ].map((item) => (
             <label key={item.label} className="checkbox-item">
               <input
@@ -425,7 +280,7 @@ function FilterControls({
               />
               <div className="custom-cb" />
               {item.label}
-              <span className="cb-count">{item.count}</span>
+              <span className="cb-count">{getExperienceCount(item.label)}</span>
             </label>
           ))}
         </div>
@@ -444,7 +299,58 @@ export default function ArtisansPage() {
   const [locationSearch, setLocationSearch] = useState("");
   const [listView, setListView] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
-  
+  const [zoomedIndex, setZoomedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (zoomedIndex === null) return;
+    const portfolioLength = selectedProfile?.portfolio?.length || 0;
+    if (portfolioLength === 0) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setZoomedIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : portfolioLength - 1));
+      } else if (e.key === "ArrowRight") {
+        setZoomedIndex((prev) => (prev !== null && prev < portfolioLength - 1 ? prev + 1 : 0));
+      } else if (e.key === "Escape") {
+        setZoomedIndex(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [zoomedIndex, selectedProfile?.portfolio]);
+
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (zoomedIndex === null) return;
+    const portfolioLength = selectedProfile?.portfolio?.length || 0;
+    setZoomedIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : portfolioLength - 1));
+  };
+
+  const handleNext = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (zoomedIndex === null) return;
+    const portfolioLength = selectedProfile?.portfolio?.length || 0;
+    setZoomedIndex((prev) => (prev !== null && prev < portfolioLength - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+  };
+
   // Advanced dynamic filter states
   const [maxPrice, setMaxPrice] = useState(150000);
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
@@ -469,6 +375,7 @@ export default function ArtisansPage() {
             Chef: "👨‍🍳",
             Painter: "🖌️",
             Driver: "🚗",
+            "Shoe Maker": "👞",
           };
           const tradeEmoji = emojiMap[item.craft] || "🛠️";
           
@@ -636,7 +543,11 @@ export default function ArtisansPage() {
               >
                 {tab.emoji ? `${tab.emoji} ` : ""}
                 {tab.label}{" "}
-                <span className="tab-count">{tab.count}</span>
+                <span className="tab-count">
+                  {tab.value === "All"
+                    ? allArtisans.length
+                    : allArtisans.filter(a => a.trade === tab.value).length}
+                </span>
               </button>
             ))}
           </div>
@@ -659,6 +570,7 @@ export default function ArtisansPage() {
             selectedExperience={selectedExperience}
             setSelectedExperience={setSelectedExperience}
             onClearAll={handleClearAll}
+            allArtisans={allArtisans}
           />
         </aside>
 
@@ -765,11 +677,13 @@ export default function ArtisansPage() {
           )}
 
           {/* LOAD MORE */}
-          <div className="load-more-wrap">
-            <button className="load-more-btn" onClick={() => showToast("Loading more artisans…")}>
-              Load more artisans (238 remaining)
-            </button>
-          </div>
+          {filtered.length > 12 && (
+            <div className="load-more-wrap">
+              <button className="load-more-btn" onClick={() => showToast("All artisans loaded")}>
+                All artisans loaded
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -821,7 +735,7 @@ export default function ArtisansPage() {
                     <h3 style={{ marginTop: "24px" }}>Portfolio Showcase</h3>
                     <div className="artisan-modal-portfolio">
                       {selectedProfile.portfolio.map((img: string, idx: number) => (
-                        <div className="portfolio-showcase-item" key={idx}>
+                        <div className="portfolio-showcase-item" key={idx} onClick={() => setZoomedIndex(idx)} style={{ cursor: "pointer" }}>
                           <img src={img} alt={`Work showcase ${idx + 1}`} />
                         </div>
                       ))}
@@ -878,6 +792,7 @@ export default function ArtisansPage() {
                 selectedExperience={selectedExperience}
                 setSelectedExperience={setSelectedExperience}
                 onClearAll={handleClearAll}
+                allArtisans={allArtisans}
               />
             </div>
             
@@ -892,6 +807,34 @@ export default function ArtisansPage() {
 
       {/* FOOTER */}
       <Footer />
+
+      {/* Lightbox Overlay */}
+      {zoomedIndex !== null && selectedProfile?.portfolio && selectedProfile.portfolio[zoomedIndex] && (
+        <div
+          className="lightbox-overlay"
+          onClick={() => setZoomedIndex(null)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <button className="lightbox-close" onClick={() => setZoomedIndex(null)} aria-label="Close viewer">✕</button>
+          
+          {selectedProfile.portfolio.length > 1 && (
+            <>
+              <button className="lightbox-nav lightbox-nav--prev" onClick={handlePrev} aria-label="Previous image">‹</button>
+              <button className="lightbox-nav lightbox-nav--next" onClick={handleNext} aria-label="Next image">›</button>
+            </>
+          )}
+
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img src={selectedProfile.portfolio[zoomedIndex]} alt="Zoomed portfolio showcase" />
+            {selectedProfile.portfolio.length > 1 && (
+              <div className="lightbox-indicator">
+                {zoomedIndex + 1} / {selectedProfile.portfolio.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

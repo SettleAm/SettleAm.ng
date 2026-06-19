@@ -583,6 +583,7 @@ export default function SignupPage() {
             <div className="craft-pill"><span>❄️</span> AC Tech</div>
             <div className="craft-pill"><span>👔</span> Tailor</div>
             <div className="craft-pill"><span>💇</span> Barber</div>
+            <div className="craft-pill"><span>👞</span> Shoe Maker</div>
           </div>
         </div>
 
@@ -696,7 +697,7 @@ export default function SignupPage() {
                       <option value="Barber / Hairdresser">Barber / Hairdresser</option>
                       <option value="Painter">Painter</option>
                       <option value="Welder">Welder</option>
-                      <option value="Cobbler">Cobbler</option>
+                      <option value="Shoe Maker">Shoe Maker</option>
                       <option value="Mason / Bricklayer">Mason / Bricklayer</option>
                       <option value="Generator Repair">Generator Repair</option>
                       <option value="Other">Other</option>

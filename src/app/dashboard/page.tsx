@@ -17,7 +17,8 @@ import Header from "../../components/Header";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface PortfolioItem {
-  url: string;          // Supabase public URL
+  url: string;          // Cloudinary public URL (set after upload)
+  previewUrl?: string;  // Local objectURL for instant preview before upload completes
   isUploading?: boolean;
   progress?: UploadProgress;
 }
@@ -43,6 +44,7 @@ export default function DashboardPage() {
 
   // Image state
   const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [profileImagePreview, setProfileImagePreview] = useState(""); // local objectURL
   const [profileImageUploading, setProfileImageUploading] = useState(false);
   const [profileImageProgress, setProfileImageProgress] = useState<UploadProgress | null>(null);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
@@ -177,14 +179,22 @@ export default function DashboardPage() {
     // Reset input so the same file can be re-selected if needed
     e.target.value = "";
 
+    // Instantly show a local preview so the user can confirm the right image was picked
+    const localPreview = URL.createObjectURL(file);
+    setProfileImagePreview(localPreview);
+
     setProfileImageUploading(true);
     setProfileImageProgress({ fileName: file.name, stage: "compressing", originalSizeKB: Math.round(file.size / 1024) });
 
     try {
       const url = await uploadProfileImage(file, user.id, (p) => setProfileImageProgress(p));
       setProfileImageUrl(url);
+      setProfileImagePreview(""); // clear local preview — real URL is now set
+      URL.revokeObjectURL(localPreview); // free memory
       triggerToast("✅ Profile photo updated!");
     } catch (err: any) {
+      setProfileImagePreview(""); // clear on error too
+      URL.revokeObjectURL(localPreview);
       triggerToast(`❌ Avatar upload failed: ${err.message}`, "error");
     } finally {
       setProfileImageUploading(false);
@@ -201,9 +211,13 @@ export default function DashboardPage() {
 
     const fileArray = Array.from(files);
 
-    // Add placeholder rows immediately so user sees something happening
-    const placeholders: PortfolioItem[] = fileArray.map((f) => ({
+    // Generate local objectURLs immediately for instant preview — user sees their image right away
+    const localPreviews = fileArray.map((f) => URL.createObjectURL(f));
+
+    // Add placeholder rows with local previews so user sees the actual selected image
+    const placeholders: PortfolioItem[] = fileArray.map((f, i) => ({
       url: "",
+      previewUrl: localPreviews[i],
       isUploading: true,
       progress: { fileName: f.name, stage: "compressing", originalSizeKB: Math.round(f.size / 1024) },
     }));
@@ -226,20 +240,22 @@ export default function DashboardPage() {
             });
           });
 
-          // Replace placeholder with real URL
+          // Replace placeholder with real Cloudinary URL; free the local preview
+          URL.revokeObjectURL(localPreviews[i]);
           setPortfolioItems((prev) => {
             const updated = [...prev];
             if (updated[itemIndex]) {
-              updated[itemIndex] = { url, isUploading: false, progress: undefined };
+              updated[itemIndex] = { url, previewUrl: undefined, isUploading: false, progress: undefined };
             }
             return updated;
           });
         } catch (err: any) {
-          // Mark item as error
+          // Keep preview visible but mark as error so user knows what happened
           setPortfolioItems((prev) => {
             const updated = [...prev];
             if (updated[itemIndex]) {
               updated[itemIndex] = {
+                ...updated[itemIndex],
                 url: "",
                 isUploading: false,
                 progress: { ...updated[itemIndex].progress!, stage: "error", error: err.message },
@@ -255,6 +271,10 @@ export default function DashboardPage() {
 
   const removePortfolioItem = async (index: number) => {
     const item = portfolioItems[index];
+    // Revoke local objectURL if still held (e.g. error state)
+    if (item.previewUrl) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
     if (item.url) {
       deleteStorageImage(item.url); // fire-and-forget
     }
@@ -547,8 +567,9 @@ export default function DashboardPage() {
               {/* Avatar upload */}
               <div className="avatar-upload-wrapper" title="Click to change profile photo">
                 <div className="artisan-preview-avatar">
-                  {profileImageUrl && !profileImageUploading
-                    ? <img src={profileImageUrl} alt="Profile" />
+                  {/* Show local preview immediately on select, then switch to real URL once done */}
+                  {(profileImagePreview || profileImageUrl)
+                    ? <img src={profileImagePreview || profileImageUrl} alt="Profile" style={{ opacity: profileImageUploading ? 0.6 : 1 }} />
                     : initials
                   }
                   {/* Overlay while uploading */}
@@ -587,7 +608,21 @@ export default function DashboardPage() {
             </div>
 
             <ul className="dash-menu">
-              <li><button className="dash-menu-item active">👤 Edit Profile</button></li>
+              <li>
+                <button className="dash-menu-item active">
+                  👤 Edit Profile
+                </button>
+              </li>
+              <li>
+                <Link href="/portfolio" className="dash-menu-item" id="portfolio-sidebar-link">
+                  🖼️ My Portfolio
+                </Link>
+              </li>
+              <li>
+                <Link href="/settings" className="dash-menu-item" id="settings-sidebar-link">
+                  ⚙️ Settings
+                </Link>
+              </li>
               <li>
                 <Link href="/artisans" className="dash-menu-item">
                   🌍 View Public Directory
@@ -647,6 +682,7 @@ export default function DashboardPage() {
                     <option value="Chef">Chef</option>
                     <option value="Painter">Painter</option>
                     <option value="Driver">Driver</option>
+                    <option value="Shoe Maker">Shoe Maker</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -747,11 +783,15 @@ export default function DashboardPage() {
                     {portfolioItems.map((item, idx) => (
                       <div className="portfolio-item" key={idx}>
 
-                        {/* Uploaded image */}
-                        {item.url && !item.isUploading && (
+                        {/* Show preview image immediately (local objectURL while uploading, real URL when done) */}
+                        {(item.previewUrl || item.url) && (
                           <>
-                            <img src={item.url} alt={`Work showcase ${idx + 1}`} />
-                            {item.progress?.compressedSizeKB && (
+                            <img
+                              src={item.previewUrl || item.url}
+                              alt={`Work showcase ${idx + 1}`}
+                              style={{ opacity: item.isUploading ? 0.55 : 1, transition: "opacity 0.3s" }}
+                            />
+                            {!item.isUploading && item.progress?.compressedSizeKB && (
                               <div className="portfolio-size-badge">
                                 ✅ {item.progress.originalSizeKB}KB → {item.progress.compressedSizeKB}KB
                               </div>
@@ -759,9 +799,9 @@ export default function DashboardPage() {
                           </>
                         )}
 
-                        {/* Uploading overlay */}
+                        {/* Uploading overlay — shown on top of the preview image */}
                         {item.isUploading && item.progress?.stage !== "error" && (
-                          <div className="portfolio-uploading-overlay">
+                          <div className="portfolio-uploading-overlay" style={{ background: "rgba(6,15,10,0.55)" }}>
                             <div className="upload-progress-ring" />
                             <div className="upload-stage-text">
                               {item.progress?.stage === "compressing" ? "Compressing…" : "Uploading…"}

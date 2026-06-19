@@ -697,7 +697,7 @@ export default function LoginPage() {
             <div className="craft-pill"><span>❄️</span> AC Tech</div>
             <div className="craft-pill"><span>👔</span> Tailor</div>
             <div className="craft-pill"><span>💇</span> Barber</div>
-            <div className="craft-pill"><span>👞</span> Cobbler</div>
+            <div className="craft-pill"><span>👞</span> Shoe Maker</div>
           </div>
         </div>
 
@@ -744,7 +744,7 @@ export default function LoginPage() {
               <div className="form-group">
                 <label htmlFor="password">
                   Password
-                  <Link href="#">Forgot password?</Link>
+                  <Link href="/forgot-password">Forgot password?</Link>
                 </label>
                 <div className="input-wrap">
                   <span className="input-icon">🔒</span>

@@ -31,9 +31,9 @@ export default function Footer() {
       </div>
       <div className="footer-links">
         <Link href="/artisans">Services</Link>
-        <Link href="#how">How it Works</Link>
-        <Link href="#verify">Trust & Safety</Link>
-        <Link href="#booking">Book Now</Link>
+        <Link href="/#how">How it Works</Link>
+        <Link href="/#verify">Trust & Safety</Link>
+        <Link href="/book">Book Now</Link>
         <Link href="/login">Login</Link>
         <Link href="/signup">Join as Artisan</Link>
       </div>

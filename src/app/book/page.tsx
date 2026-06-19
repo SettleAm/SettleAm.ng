@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "../../components/Footer";
@@ -18,6 +18,7 @@ const AVATAR_COLOURS: Record<string, string> = {
   Chef:           "#EF4444",
   Painter:        "#10B981",
   Driver:         "#6366F1",
+  "Shoe Maker":   "#8B5A2B",
 };
 
 const TRADE_EMOJI: Record<string, string> = {
@@ -31,6 +32,7 @@ const TRADE_EMOJI: Record<string, string> = {
   Chef:           "👨‍🍳",
   Painter:        "🖌️",
   Driver:         "🚗",
+  "Shoe Maker":   "👞",
 };
 
 // ─── Inner form (needs Suspense because it calls useSearchParams) ─────────────
@@ -40,29 +42,40 @@ function BookingForm() {
   const artisanName  = params.get("name")  ?? "";
   const artisanTrade = params.get("trade") ?? "";
 
-  const avatarBg = AVATAR_COLOURS[artisanTrade] ?? "#1DB069";
-  const emoji    = TRADE_EMOJI[artisanTrade]    ?? "🔧";
-  const initials = artisanName
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   const [formData, setFormData] = useState({
     clientName: "",
     phone:      "",
+    service:    artisanTrade || "",
     location:   "",
     desc:       "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors]       = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (artisanTrade) {
+      setFormData((prev) => ({ ...prev, service: artisanTrade }));
+    }
+  }, [artisanTrade]);
+
+  const currentService = artisanTrade || formData.service;
+  const avatarBg = AVATAR_COLOURS[currentService] ?? "#1DB069";
+  const emoji    = TRADE_EMOJI[currentService]    ?? "🔧";
+  const initials = artisanName
+    ? artisanName
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "";
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!formData.clientName.trim()) e.clientName = "Full name is required.";
     if (!formData.phone.trim())      e.phone      = "Phone number is required.";
     if (!formData.location.trim())   e.location   = "Location is required.";
+    if (!artisanName && !formData.service)   e.service    = "Service needed is required.";
     return e;
   };
 
@@ -74,8 +87,9 @@ function BookingForm() {
     const phone = "2348120674396";
     const text  =
       `*New Booking Request — SettleAm* 🔧\n\n` +
-      `*Selected Artisan:* ${artisanName || "—"}\n` +
-      `*Profession:* ${emoji} ${artisanTrade || "—"}\n\n` +
+      (artisanName 
+        ? `*Selected Artisan:* ${artisanName}\n*Profession:* ${emoji} ${artisanTrade || "—"}\n\n`
+        : `*Request:* General Booking\n*Profession Needed:* ${emoji} ${formData.service || "—"}\n\n`) +
       `*Client Name:* ${formData.clientName}\n` +
       `*Client Phone:* ${formData.phone}\n` +
       `*Location:* ${formData.location}\n` +
@@ -107,9 +121,11 @@ function BookingForm() {
 
       {/* ── Form card ── */}
       <div className="form-card book-form-card">
-        <h3>Complete your Booking</h3>
+        <h3>{artisanName ? "Complete your Booking" : "Book an Artisan"}</h3>
         <p>
-          Fill in your details and we'll send your request directly to our team via WhatsApp.
+          {artisanName 
+            ? "Fill in your details and we'll send your request directly to our team via WhatsApp."
+            : "Fill this form and we'll match you with a verified professional in your area."}
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -124,6 +140,34 @@ function BookingForm() {
                 <label>Profession</label>
                 <input type="text" value={`${emoji} ${artisanTrade}`} readOnly className="book-readonly-input" />
               </div>
+            </div>
+          )}
+
+          {!artisanName && (
+            <div className="form-group">
+              <label htmlFor="bService">Service Needed *</label>
+              <select
+                id="bService"
+                value={formData.service}
+                onChange={(e) => {
+                  setFormData({ ...formData, service: e.target.value });
+                  setErrors({ ...errors, service: "" });
+                }}
+              >
+                <option value="">Select a service...</option>
+                <option value="Electrician">Electrician ⚡</option>
+                <option value="Plumber">Plumber 🔧</option>
+                <option value="Tailor">Tailor ✂️</option>
+                <option value="AC Tech">AC Technician ❄️</option>
+                <option value="Carpenter">Carpenter 🪚</option>
+                <option value="Cleaner">Cleaner 🧹</option>
+                <option value="Hair Stylist">Hair Stylist 💇</option>
+                <option value="Chef">Chef 👨‍🍳</option>
+                <option value="Painter">Painter 🖌️</option>
+                <option value="Driver">Driver 🚗</option>
+                <option value="Shoe Maker">Shoe Maker 👞</option>
+              </select>
+              {errors.service && <div className="book-field-error">{errors.service}</div>}
             </div>
           )}
 
