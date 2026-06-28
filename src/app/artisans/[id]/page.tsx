@@ -8,32 +8,7 @@ import { profileService } from "../../../utils/profileService";
 import Footer from "../../../components/Footer";
 import Header from "../../../components/Header";
 
-// Generate realistic mock reviews for any craft/name to keep the UI complete and lively
-function getMockReviews(name: string, craft: string) {
-  return [
-    {
-      id: 1,
-      author: "Chinedu Alao",
-      rating: 5,
-      date: "2 weeks ago",
-      comment: `Highly recommended! ${name} resolved my ${craft.toLowerCase()} issue in under an hour. Very clean and professional work.`
-    },
-    {
-      id: 2,
-      author: "Yetunde Soyinka",
-      rating: 5,
-      date: "1 month ago",
-      comment: `Extremely polite and punctual. Came with all required tools and completed the installation without any hassle. Will book again.`
-    },
-    {
-      id: 3,
-      author: "Musa Ibrahim",
-      rating: 4.8,
-      date: "2 months ago",
-      comment: "Good quality of work and fair pricing. Cleaned up the site after work. Recommended."
-    }
-  ];
-}
+
 
 export default function ArtisanProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -204,7 +179,7 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const reviewsList = getMockReviews(artisan.name, artisan.trade);
+
 
   return (
     <>
@@ -421,21 +396,11 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
             )}
 
             <div className="prof-card-block">
-              <h3>Customer Feedbacks & Reviews</h3>
-              <div className="reviews-list">
-                {reviewsList.map((rev) => (
-                  <div className="review-card" key={rev.id}>
-                    <div className="review-card-header">
-                      <span className="review-author">{rev.author}</span>
-                      <span className="review-stars">{"★".repeat(Math.floor(rev.rating))}</span>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }}>
-                      <span className="review-date">{rev.date}</span>
-                      <span style={{ fontSize: "0.78rem", color: "var(--green-bright)", fontWeight: 600 }}>✅ Verified Booking</span>
-                    </div>
-                    <p className="review-comment">{rev.comment}</p>
-                  </div>
-                ))}
+              <h3>Customer Feedbacks &amp; Reviews</h3>
+              <div style={{ textAlign: "center", padding: "32px 0", color: "var(--muted)" }}>
+                <div style={{ fontSize: "2rem", marginBottom: "12px" }}>💬</div>
+                <p style={{ fontSize: "0.92rem", fontWeight: 500, marginBottom: "6px", color: "var(--dark)" }}>No reviews yet</p>
+                <p style={{ fontSize: "0.85rem", fontWeight: 300 }}>Be the first to book and leave a review!</p>
               </div>
             </div>
           </div>

@@ -81,8 +81,14 @@ export default function DashboardPage() {
         const existingProfile = await profileService.ensureProfileForUser(
           user.id,
           user.email || "",
-          user.user_metadata
+          user.user_metadata,
+          "artisan"
         );
+
+        if (existingProfile.role === "customer") {
+          router.push("/customer");
+          return;
+        }
 
         setProfile(existingProfile);
         setFirstName(existingProfile.first_name);

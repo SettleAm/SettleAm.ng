@@ -16,6 +16,7 @@ export interface ArtisanProfile {
   portfolio: string[];    // Supabase Storage URLs for work photos
   rating: number;
   reviews: number;
+  role?: 'customer' | 'artisan';
 }
 
 // Key for local storage fallback list of all custom profiles (to display on the listing page)
@@ -46,6 +47,7 @@ export const profileService = {
           portfolio: profile.portfolio,
           rating: profile.rating,
           reviews: profile.reviews,
+          role: profile.role || "customer",
           updated_at: new Date().toISOString(),
         }, { onConflict: "id" });
 
@@ -106,6 +108,7 @@ export const profileService = {
           portfolio: Array.isArray(data.portfolio) ? data.portfolio : [],
           rating: data.rating || 5.0,
           reviews: data.reviews || 0,
+          role: data.role || "customer",
         };
       }
     } catch (err) {
@@ -152,6 +155,7 @@ export const profileService = {
           portfolio: Array.isArray(item.portfolio) ? item.portfolio : [],
           rating: item.rating || 5.0,
           reviews: item.reviews || 0,
+          role: item.role || "customer",
         }));
       }
     } catch (err) {
@@ -175,9 +179,13 @@ export const profileService = {
    * Helper to automatically create/ensure an artisan profile on signup/login.
    * Pulls info from current Supabase session metadata if profile doesn't exist yet.
    */
-  async ensureProfileForUser(userId: string, email: string, metadata: any): Promise<ArtisanProfile> {
+  async ensureProfileForUser(userId: string, email: string, metadata: any, defaultRole: 'customer' | 'artisan' = 'customer'): Promise<ArtisanProfile> {
     const existing = await this.getProfile(userId);
     if (existing) {
+      if (!existing.role) {
+        existing.role = metadata?.role || defaultRole;
+        await this.saveProfile(existing);
+      }
       return existing;
     }
 
@@ -198,6 +206,7 @@ export const profileService = {
       portfolio: [],
       rating: 5.0,
       reviews: 0,
+      role: metadata?.role || defaultRole,
     };
 
     await this.saveProfile(newProfile);

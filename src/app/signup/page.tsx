@@ -10,6 +10,7 @@ export default function SignupPage() {
   const router = useRouter();
 
   // State fields
+  const [role, setRole] = useState<"customer" | "artisan" | null>(null);
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
@@ -48,7 +49,7 @@ export default function SignupPage() {
     if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
       newErrors.phone = "Please enter a valid phone number.";
     }
-    if (!craft) newErrors.craft = "Please select your craft.";
+    if (role === "artisan" && !craft) newErrors.craft = "Please select your craft.";
     if (!location.trim()) newErrors.location = "Location is required.";
     if (password.length < 8) newErrors.password = "Password must be at least 8 characters.";
     if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match.";
@@ -69,8 +70,9 @@ export default function SignupPage() {
             first_name: fname.trim(),
             last_name: lname.trim(),
             phone: phone.trim(),
-            craft,
+            craft: role === "artisan" ? craft : "",
             location: location.trim(),
+            role,
           },
         },
       });
@@ -93,9 +95,11 @@ export default function SignupPage() {
               first_name: fname.trim(),
               last_name: lname.trim(),
               phone: phone.trim(),
-              craft,
+              craft: role === "artisan" ? craft : "",
               location: location.trim(),
-            }
+              role,
+            },
+            role || "customer"
           );
         }
 
@@ -532,6 +536,120 @@ export default function SignupPage() {
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        .role-cards {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin: 32px 0;
+        }
+
+        .role-card {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 24px;
+          background: rgba(255,255,255,0.04);
+          border: 1.5px solid var(--border);
+          border-radius: 16px;
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          color: var(--white);
+          position: relative;
+          overflow: hidden;
+          outline: none;
+        }
+
+        .role-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, transparent 0%, rgba(29,176,105,0.06) 100%);
+          opacity: 0;
+          transition: opacity 0.25s;
+        }
+
+        .role-card:hover {
+          background: rgba(255,255,255,0.08);
+          border-color: var(--border-focus);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(14,107,69,0.15);
+        }
+
+        .role-card:hover::before {
+          opacity: 1;
+        }
+
+        .role-card-icon {
+          font-size: 2.2rem;
+          background: rgba(29,176,105,0.1);
+          width: 64px;
+          height: 64px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          border: 1px solid rgba(29,176,105,0.2);
+          transition: transform 0.25s;
+        }
+
+        .role-card:hover .role-card-icon {
+          transform: scale(1.05) rotate(-3deg);
+          background: rgba(29,176,105,0.2);
+        }
+
+        .role-card-content {
+          flex: 1;
+        }
+
+        .role-card-content h3 {
+          font-family: 'Syne', sans-serif;
+          font-weight: 700;
+          font-size: 1.15rem;
+          color: var(--white);
+          margin-bottom: 4px;
+        }
+
+        .role-card-content p {
+          font-size: 0.85rem;
+          color: var(--muted);
+          line-height: 1.4;
+          font-weight: 300;
+        }
+
+        .role-card-arrow {
+          font-size: 1.2rem;
+          opacity: 0.3;
+          transition: transform 0.25s, opacity 0.25s;
+        }
+
+        .role-card:hover .role-card-arrow {
+          opacity: 1;
+          transform: translateX(4px);
+          color: var(--green-bright);
+        }
+
+        .back-to-role {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.82rem;
+          color: var(--muted);
+          background: none;
+          border: none;
+          cursor: pointer;
+          margin-bottom: 24px;
+          padding: 0;
+          transition: color 0.2s;
+          font-family: inherit;
+        }
+
+        .back-to-role:hover {
+          color: var(--white);
+        }
+
         @media (max-width: 768px) {
           .signup-body-wrapper { grid-template-columns: 1fr; overflow: auto; }
           .left { min-height: auto; padding: 36px 24px 40px; display: none; }
@@ -557,23 +675,47 @@ export default function SignupPage() {
           {/* Hero Copy */}
           <div className="hero-copy">
             <div className="hero-tag">Join SettleAm</div>
-            <h1 className="hero-h1">Start earning.<br /><em>Get verified.</em><br />Build trust.</h1>
-            <p className="hero-p">Create your free artisan account in under 2 minutes and start receiving job bookings from customers near you.</p>
+            {role === "customer" ? (
+              <>
+                <h1 className="hero-h1">Find help.<br /><em>Get it fixed.</em><br />Settle am!</h1>
+                <p className="hero-p">Create your customer account and connect with top verified local artisans in your area.</p>
 
-            <div className="steps-list">
-              <div className="step-item">
-                <div className="step-num">1</div>
-                <div className="step-text"><h4>Create your account</h4><p>Fill in your basic info and craft type.</p></div>
-              </div>
-              <div className="step-item">
-                <div className="step-num">2</div>
-                <div className="step-text"><h4>Get verified</h4><p>We verify your skills and ID for trust badges.</p></div>
-              </div>
-              <div className="step-item">
-                <div className="step-num">3</div>
-                <div className="step-text"><h4>Start getting jobs</h4><p>Receive bookings and get paid securely via escrow.</p></div>
-              </div>
-            </div>
+                <div className="steps-list">
+                  <div className="step-item">
+                    <div className="step-num">1</div>
+                    <div className="step-text"><h4>Find an Artisan</h4><p>Browse qualified professionals near you.</p></div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">2</div>
+                    <div className="step-text"><h4>Book securely</h4><p>Pay via escrow protection; your money is safe until done.</p></div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">3</div>
+                    <div className="step-text"><h4>Get it done</h4><p>Relax while our expert handles the work.</p></div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h1 className="hero-h1">Start earning.<br /><em>Get verified.</em><br />Build trust.</h1>
+                <p className="hero-p">Create your free artisan account in under 2 minutes and start receiving job bookings from customers near you.</p>
+
+                <div className="steps-list">
+                  <div className="step-item">
+                    <div className="step-num">1</div>
+                    <div className="step-text"><h4>Create your account</h4><p>Fill in your basic info and craft type.</p></div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">2</div>
+                    <div className="step-text"><h4>Get verified</h4><p>We verify your skills and ID for trust badges.</p></div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">3</div>
+                    <div className="step-text"><h4>Start getting jobs</h4><p>Receive bookings and get paid securely via escrow.</p></div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="craft-strip">
@@ -588,227 +730,277 @@ export default function SignupPage() {
         </div>
 
         <div className="right">
-          <div className="form-wrap">
-            <div className="form-header">
-              <h2>Create your account 🛠️</h2>
-              <p>Join thousands of verified artisans already earning on SettleAm.</p>
+          {!role ? (
+            <div className="form-wrap">
+              <div className="form-header">
+                <h2>Join SettleAm 🤝</h2>
+                <p>Select your account type below to get started with the right platform experience.</p>
+              </div>
+
+              <div className="role-cards">
+                <button className="role-card" onClick={() => setRole("customer")}>
+                  <div className="role-card-icon">🛒</div>
+                  <div className="role-card-content">
+                    <h3>I'm a Customer</h3>
+                    <p>I want to find, book, and hire verified local artisans for my projects.</p>
+                  </div>
+                  <span className="role-card-arrow">→</span>
+                </button>
+
+                <button className="role-card" onClick={() => setRole("artisan")}>
+                  <div className="role-card-icon">🛠️</div>
+                  <div className="role-card-content">
+                    <h3>I'm an Artisan</h3>
+                    <p>I want to offer my services, build my profile, and receive job bookings.</p>
+                  </div>
+                  <span className="role-card-arrow">→</span>
+                </button>
+              </div>
+
+              <div className="login-row">
+                Already have an account? <Link href="/login">Log in here</Link>
+              </div>
             </div>
-
-            <div className="social-login">
-              <button className="social-btn" onClick={() => handleSocialSignup("Google")}><span>🌐</span> Google</button>
-              <button className="social-btn" onClick={() => handleSocialSignup("Phone")}><span>📱</span> Phone</button>
-            </div>
-            <div className="or-divider"><span>or sign up with email</span></div>
-
-            <form onSubmit={handleSignup}>
-              <div className="form-row">
-                {/* First name */}
-                <div className="form-group">
-                  <label htmlFor="fname">First name</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">👤</span>
-                    <input
-                      type="text"
-                      id="fname"
-                      placeholder="Emeka"
-                      autoComplete="given-name"
-                      value={fname}
-                      onChange={(e) => setFname(e.target.value)}
-                      className={errors.fname ? "error-input" : ""}
-                    />
-                  </div>
-                  <div className={`error-msg ${errors.fname ? "visible" : ""}`}>{errors.fname}</div>
-                </div>
-
-                {/* Last name */}
-                <div className="form-group">
-                  <label htmlFor="lname">Last name</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">👤</span>
-                    <input
-                      type="text"
-                      id="lname"
-                      placeholder="Okafor"
-                      autoComplete="family-name"
-                      value={lname}
-                      onChange={(e) => setLname(e.target.value)}
-                      className={errors.lname ? "error-input" : ""}
-                    />
-                  </div>
-                  <div className={`error-msg ${errors.lname ? "visible" : ""}`}>{errors.lname}</div>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="form-group">
-                <label htmlFor="email">Email address</label>
-                <div className="input-wrap">
-                  <span className="input-icon">✉️</span>
-                  <input
-                    type="email"
-                    id="email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={errors.email ? "error-input" : ""}
-                  />
-                </div>
-                <div className={`error-msg ${errors.email ? "visible" : ""}`}>{errors.email}</div>
-              </div>
-
-              {/* Phone */}
-              <div className="form-group">
-                <label htmlFor="phone">Phone number</label>
-                <div className="input-wrap">
-                  <span className="input-icon">📱</span>
-                  <input
-                    type="tel"
-                    id="phone"
-                    placeholder="+234 800 000 0000"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className={errors.phone ? "error-input" : ""}
-                  />
-                </div>
-                <div className={`error-msg ${errors.phone ? "visible" : ""}`}>{errors.phone}</div>
-              </div>
-
-              <div className="form-row">
-                {/* Craft */}
-                <div className="form-group">
-                  <label htmlFor="craft">Your craft / service</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">🛠️</span>
-                    <select
-                      id="craft"
-                      value={craft}
-                      onChange={(e) => setCraft(e.target.value)}
-                      className={errors.craft ? "error-input" : ""}
-                      style={{ paddingLeft: "40px" }}
-                    >
-                      <option value="">Select craft...</option>
-                      <option value="Electrician">Electrician</option>
-                      <option value="Plumber">Plumber</option>
-                      <option value="Carpenter">Carpenter</option>
-                      <option value="AC Technician">AC Technician</option>
-                      <option value="Tailor">Tailor</option>
-                      <option value="Barber / Hairdresser">Barber / Hairdresser</option>
-                      <option value="Painter">Painter</option>
-                      <option value="Welder">Welder</option>
-                      <option value="Shoe Maker">Shoe Maker</option>
-                      <option value="Mason / Bricklayer">Mason / Bricklayer</option>
-                      <option value="Generator Repair">Generator Repair</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className={`error-msg ${errors.craft ? "visible" : ""}`}>{errors.craft}</div>
-                </div>
-
-                {/* Location */}
-                <div className="form-group">
-                  <label htmlFor="location">Your LGA / Area</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">📍</span>
-                    <input
-                      type="text"
-                      id="location"
-                      placeholder="e.g. Abeokuta, Ogun"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className={errors.location ? "error-input" : ""}
-                    />
-                  </div>
-                  <div className={`error-msg ${errors.location ? "visible" : ""}`}>{errors.location}</div>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="form-group">
-                <label htmlFor="password">Create a password</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    placeholder="Minimum 8 characters"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={errors.password ? "error-input" : ""}
-                  />
-                  <button
-                    className="eye-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    type="button"
-                    aria-label="Toggle password"
-                  >
-                    {showPassword ? "🙈" : "👁"}
-                  </button>
-                </div>
-                <div className={`error-msg ${errors.password ? "visible" : ""}`}>{errors.password}</div>
-              </div>
-
-              {/* Confirm password */}
-              <div className="form-group">
-                <label htmlFor="confirm">Confirm password</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    id="confirm"
-                    placeholder="Re-enter your password"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={errors.confirmPassword ? "error-input" : ""}
-                  />
-                  <button
-                    className="eye-toggle"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    type="button"
-                    aria-label="Toggle confirm password"
-                  >
-                    {showConfirmPassword ? "🙈" : "👁"}
-                  </button>
-                </div>
-                <div className={`error-msg ${errors.confirmPassword ? "visible" : ""}`}>{errors.confirmPassword}</div>
-              </div>
-
-              {/* Terms Checkbox */}
-              <div className="terms-row">
-                <div
-                  className={`custom-check ${terms ? "checked" : ""}`}
-                  id="terms-check"
-                  onClick={() => setTerms(!terms)}
-                  role="checkbox"
-                  aria-checked={terms}
-                  tabIndex={0}
-                ></div>
-                <div className="terms-label" onClick={() => setTerms(!terms)}>
-                  I agree to SettleAm's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                </div>
-              </div>
-              <div className={`error-msg ${errors.terms ? "visible" : ""}`} style={{ marginTop: "-10px", marginBottom: "14px" }}>
-                {errors.terms}
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                className={`btn-signup ${loading ? "loading" : ""}`}
-                id="signup-btn"
-                disabled={loading}
-              >
-                <span className="btn-text">Create My Artisan Account →</span>
+          ) : (
+            <div className="form-wrap">
+              <button className="back-to-role" onClick={() => { setRole(null); setErrors({}); }}>
+                ← Change account type
               </button>
-            </form>
 
-            <div className="login-row">
-              Already have an account? <Link href="/login">Log in here</Link>
+              <div className="form-header">
+                {role === "customer" ? (
+                  <>
+                    <h2>Create customer account 🛒</h2>
+                    <p>Register to find and book verified local artisans near you.</p>
+                  </>
+                ) : (
+                  <>
+                    <h2>Create artisan account 🛠️</h2>
+                    <p>Join thousands of verified artisans already earning on SettleAm.</p>
+                  </>
+                )}
+              </div>
+
+              <div className="social-login">
+                <button className="social-btn" onClick={() => handleSocialSignup("Google")}><span>🌐</span> Google</button>
+                <button className="social-btn" onClick={() => handleSocialSignup("Phone")}><span>📱</span> Phone</button>
+              </div>
+              <div className="or-divider"><span>or sign up with email</span></div>
+
+              <form onSubmit={handleSignup}>
+                <div className="form-row">
+                  {/* First name */}
+                  <div className="form-group">
+                    <label htmlFor="fname">First name</label>
+                    <div className="input-wrap">
+                      <span className="input-icon">👤</span>
+                      <input
+                        type="text"
+                        id="fname"
+                        placeholder="Emeka"
+                        autoComplete="given-name"
+                        value={fname}
+                        onChange={(e) => setFname(e.target.value)}
+                        className={errors.fname ? "error-input" : ""}
+                      />
+                    </div>
+                    <div className={`error-msg ${errors.fname ? "visible" : ""}`}>{errors.fname}</div>
+                  </div>
+
+                  {/* Last name */}
+                  <div className="form-group">
+                    <label htmlFor="lname">Last name</label>
+                    <div className="input-wrap">
+                      <span className="input-icon">👤</span>
+                      <input
+                        type="text"
+                        id="lname"
+                        placeholder="Okafor"
+                        autoComplete="family-name"
+                        value={lname}
+                        onChange={(e) => setLname(e.target.value)}
+                        className={errors.lname ? "error-input" : ""}
+                      />
+                    </div>
+                    <div className={`error-msg ${errors.lname ? "visible" : ""}`}>{errors.lname}</div>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="form-group">
+                  <label htmlFor="email">Email address</label>
+                  <div className="input-wrap">
+                    <span className="input-icon">✉️</span>
+                    <input
+                      type="email"
+                      id="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={errors.email ? "error-input" : ""}
+                    />
+                  </div>
+                  <div className={`error-msg ${errors.email ? "visible" : ""}`}>{errors.email}</div>
+                </div>
+
+                {/* Phone */}
+                <div className="form-group">
+                  <label htmlFor="phone">Phone number</label>
+                  <div className="input-wrap">
+                    <span className="input-icon">📱</span>
+                    <input
+                      type="tel"
+                      id="phone"
+                      placeholder="+234 800 000 0000"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={errors.phone ? "error-input" : ""}
+                    />
+                  </div>
+                  <div className={`error-msg ${errors.phone ? "visible" : ""}`}>{errors.phone}</div>
+                </div>
+
+                <div className="form-row">
+                  {/* Craft */}
+                  {role === "artisan" && (
+                    <div className="form-group">
+                      <label htmlFor="craft">Your craft / service</label>
+                      <div className="input-wrap">
+                        <span className="input-icon">🛠️</span>
+                        <select
+                          id="craft"
+                          value={craft}
+                          onChange={(e) => setCraft(e.target.value)}
+                          className={errors.craft ? "error-input" : ""}
+                          style={{ paddingLeft: "40px" }}
+                        >
+                          <option value="">Select craft...</option>
+                          <option value="Electrician">Electrician</option>
+                          <option value="Plumber">Plumber</option>
+                          <option value="Carpenter">Carpenter</option>
+                          <option value="AC Technician">AC Technician</option>
+                          <option value="Tailor">Tailor</option>
+                          <option value="Barber / Hairdresser">Barber / Hairdresser</option>
+                          <option value="Painter">Painter</option>
+                          <option value="Welder">Welder</option>
+                          <option value="Shoe Maker">Shoe Maker</option>
+                          <option value="Mason / Bricklayer">Mason / Bricklayer</option>
+                          <option value="Generator Repair">Generator Repair</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className={`error-msg ${errors.craft ? "visible" : ""}`}>{errors.craft}</div>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  <div className="form-group" style={{ gridColumn: role === "customer" ? "span 2" : "auto" }}>
+                    <label htmlFor="location">Your LGA / Area</label>
+                    <div className="input-wrap">
+                      <span className="input-icon">📍</span>
+                      <input
+                        type="text"
+                        id="location"
+                        placeholder="e.g. Abeokuta, Ogun"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className={errors.location ? "error-input" : ""}
+                      />
+                    </div>
+                    <div className={`error-msg ${errors.location ? "visible" : ""}`}>{errors.location}</div>
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="form-group">
+                  <label htmlFor="password">Create a password</label>
+                  <div className="input-wrap">
+                    <span className="input-icon">🔒</span>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      placeholder="Minimum 8 characters"
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className={errors.password ? "error-input" : ""}
+                    />
+                    <button
+                      className="eye-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                      type="button"
+                      aria-label="Toggle password"
+                    >
+                      {showPassword ? "🙈" : "👁"}
+                    </button>
+                  </div>
+                  <div className={`error-msg ${errors.password ? "visible" : ""}`}>{errors.password}</div>
+                </div>
+
+                {/* Confirm password */}
+                <div className="form-group">
+                  <label htmlFor="confirm">Confirm password</label>
+                  <div className="input-wrap">
+                    <span className="input-icon">🔒</span>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirm"
+                      placeholder="Re-enter your password"
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={errors.confirmPassword ? "error-input" : ""}
+                    />
+                    <button
+                      className="eye-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      type="button"
+                      aria-label="Toggle confirm password"
+                    >
+                      {showConfirmPassword ? "🙈" : "👁"}
+                    </button>
+                  </div>
+                  <div className={`error-msg ${errors.confirmPassword ? "visible" : ""}`}>{errors.confirmPassword}</div>
+                </div>
+
+                {/* Terms Checkbox */}
+                <div className="terms-row">
+                  <div
+                    className={`custom-check ${terms ? "checked" : ""}`}
+                    id="terms-check"
+                    onClick={() => setTerms(!terms)}
+                    role="checkbox"
+                    aria-checked={terms}
+                    tabIndex={0}
+                  ></div>
+                  <div className="terms-label" onClick={() => setTerms(!terms)}>
+                    I agree to SettleAm's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                  </div>
+                </div>
+                <div className={`error-msg ${errors.terms ? "visible" : ""}`} style={{ marginTop: "-10px", marginBottom: "14px" }}>
+                  {errors.terms}
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  className={`btn-signup ${loading ? "loading" : ""}`}
+                  id="signup-btn"
+                  disabled={loading}
+                >
+                  <span className="btn-text">
+                    {role === "customer" ? "Create My Customer Account →" : "Create My Artisan Account →"}
+                  </span>
+                </button>
+              </form>
+
+              <div className="login-row">
+                Already have an account? <Link href="/login">Log in here</Link>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

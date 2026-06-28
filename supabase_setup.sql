@@ -24,6 +24,7 @@ create table if not exists public.profiles (
   portfolio     text[] default '{}',      -- Cloudinary optimized image URLs
   rating        numeric(3,1) default 5.0,
   reviews       integer default 0,
+  role          text default 'customer' check (role in ('customer', 'artisan')),
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
 );

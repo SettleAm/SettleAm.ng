@@ -56,17 +56,28 @@ export default function LoginPage() {
         return;
       }
 
+      let userRole: "customer" | "artisan" = "customer";
       if (data?.user) {
-        await profileService.ensureProfileForUser(
+        const metaRole = data.user.user_metadata?.role;
+        const metaCraft = data.user.user_metadata?.craft;
+        const defaultRole = metaRole || (metaCraft ? "artisan" : "customer");
+
+        const profile = await profileService.ensureProfileForUser(
           data.user.id,
           data.user.email || "",
-          data.user.user_metadata
+          data.user.user_metadata,
+          defaultRole
         );
+        userRole = profile.role || defaultRole;
       }
 
       triggerToast("✅ Welcome back! Redirecting to your dashboard…");
       setTimeout(() => {
-        router.push("/dashboard");
+        if (userRole === "customer") {
+          router.push("/customer");
+        } else {
+          router.push("/dashboard");
+        }
       }, 1800);
     } catch (err: any) {
       triggerToast(`❌ ${err.message || "An unexpected error occurred."}`);
