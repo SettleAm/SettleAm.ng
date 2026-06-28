@@ -687,7 +687,7 @@ export default function SignupPage() {
                   </div>
                   <div className="step-item">
                     <div className="step-num">2</div>
-                    <div className="step-text"><h4>Book securely</h4><p>Pay via escrow protection; your money is safe until done.</p></div>
+                    <div className="step-text"><h4>Direct payment</h4><p>Pay the artisan directly after job completion.</p></div>
                   </div>
                   <div className="step-item">
                     <div className="step-num">3</div>
@@ -711,7 +711,7 @@ export default function SignupPage() {
                   </div>
                   <div className="step-item">
                     <div className="step-num">3</div>
-                    <div className="step-text"><h4>Start getting jobs</h4><p>Receive bookings and get paid securely via escrow.</p></div>
+                    <div className="step-text"><h4>Start getting jobs</h4><p>Receive bookings and get paid directly by customers.</p></div>
                   </div>
                 </div>
               </>

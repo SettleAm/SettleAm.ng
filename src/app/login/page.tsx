@@ -690,8 +690,8 @@ export default function LoginPage() {
                 <div className="stat-label">Flat commission<br />only when you earn</div>
               </div>
               <div>
-                <div className="stat-num">24hr</div>
-                <div className="stat-label">Secure escrow<br />payment protection</div>
+                <div className="stat-num">₦0</div>
+                <div className="stat-label">Registration fees<br />get started for free</div>
               </div>
               <div>
                 <div className="stat-num">⭐ 4.8</div>

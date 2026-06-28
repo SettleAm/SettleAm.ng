@@ -1,21 +1,21 @@
 export default function PaymentProtection() {
   const steps = [
-    { num: "1", title: "Customer Pays",  desc: "Pay via card, bank transfer, USSD, or Opay/Palmpay" },
-    { num: "2", title: "Funds Held",     desc: "SettleAm securely holds payment in escrow" },
-    { num: "3", title: "Job Completed",  desc: "Artisan finishes and customer confirms" },
-    { num: "4", title: "Artisan Paid",   desc: "Funds released directly to artisan's bank account" },
+    { num: "1", title: "Book Artisan",  desc: "Find and book a verified artisan near you" },
+    { num: "2", title: "Job Completed", desc: "Artisan finishes the work" },
+    { num: "3", title: "Confirm Satisfaction", desc: "Inspect the work to ensure it's done right" },
+    { num: "4", title: "Direct Payment", desc: "Pay the artisan directly via cash or bank transfer" },
   ];
 
   return (
     <section>
       <div className="section-tag reveal">Payment</div>
       <h2 className="section-title reveal">
-        Your money is protected.
+        Safe and reliable
         <br />
-        Always.
+        direct payment.
       </h2>
       <p className="section-sub reveal">
-        SettleAm uses an escrow system — we hold your payment until you confirm the job is done right.
+        SettleAm connects you with verified local artisans. Pay the artisan directly after you confirm the job is completed to your satisfaction.
       </p>
       <div className="payment-flow reveal">
         {steps.map((step, i) => (
@@ -30,13 +30,6 @@ export default function PaymentProtection() {
             )}
           </>
         ))}
-      </div>
-      <div className="escrow-note reveal">
-        <span>⏱️</span>
-        <span>
-          <strong>24-Hour Dispute Window:</strong> If you're unsatisfied with a job, you have 24 hours after
-          completion to raise a dispute — before any payment is released to the artisan.
-        </span>
       </div>
     </section>
   );

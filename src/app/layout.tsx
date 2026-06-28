@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "SettleAm — Nigeria's Trusted Artisan Marketplace",
-  description: "Book verified electricians, plumbers, carpenters, and more in minutes. Safe, reliable escrow payment protection and dispute window for all home repairs in Nigeria.",
+  description: "Book verified electricians, plumbers, carpenters, and more in minutes. Safe, reliable home repairs in Nigeria with direct payment to the artisan after job completion.",
 };
 
 export default function RootLayout({

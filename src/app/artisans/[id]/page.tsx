@@ -431,7 +431,7 @@ export default function ArtisanProfilePage({ params }: { params: Promise<{ id: s
               </button>
               
               <div className="side-escrow-badge">
-                🔒 SettleAm Escrow Secure Protection Enabled
+                🔒 Pay artisan directly after job completion
               </div>
             </div>
           </div>

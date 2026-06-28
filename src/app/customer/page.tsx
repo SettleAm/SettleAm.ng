@@ -59,9 +59,8 @@ const QUICK_FILTERS = [
 ];
 
 const TRUST_ITEMS = [
-  { icon: "✓",  title: "All artisans verified",        desc: "NIN, ID card, skills test, reference check" },
-  { icon: "🔐", title: "Escrow payment protection",    desc: "Money released only when you confirm" },
-  { icon: "⏱️", title: "24-hour dispute window",       desc: "Raise issues before artisan is paid" },
+  { icon: "✓",  title: "All artisans verified",        desc: "NIN, ID card, face verification, address check" },
+  { icon: "🔐", title: "Direct payment to artisan",    desc: "Pay only when you confirm job is completed" },
   { icon: "⭐", title: "Real customer ratings",         desc: "Only customers who booked can review" },
 ];
 
@@ -688,7 +687,7 @@ export default function CustomerHomePage() {
                 <div className="cu-cta-inner">
                   <div className="cu-cta-tag">NEED HELP NOW?</div>
                   <h3>Book a vetted artisan in under 2 minutes</h3>
-                  <p>Escrow-protected payment. Pay only when you're satisfied with the work.</p>
+                  <p>Direct payment. Pay the artisan only when you're satisfied with the work.</p>
                   <Link href="/artisans" className="cu-cta-btn">Browse Artisans →</Link>
                 </div>
               </div>

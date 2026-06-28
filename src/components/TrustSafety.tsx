@@ -4,9 +4,6 @@ export default function TrustSafety() {
     "Government-issued ID card",
     "Verified face photo",
     "Home / workshop address confirmed",
-    "Guarantor or referral check",
-    "Skills assessment test",
-    "Trial job completion",
   ];
 
   const ratings = [

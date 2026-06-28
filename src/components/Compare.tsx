@@ -21,20 +21,12 @@ export default function Compare() {
             <td className="highlight-col check-yes">✓ Yes</td>
           </tr>
           <tr>
-            <td>Transparent Commission</td>
-            <td className="highlight-col check-yes">✓ 10% flat</td>
-          </tr>
-          <tr>
-            <td>Escrow Payment Protection</td>
-            <td className="highlight-col check-yes">✓ + 24hr dispute</td>
+            <td>Direct Payment to Artisan</td>
+            <td className="highlight-col check-yes">✓ Pay after completion</td>
           </tr>
           <tr>
             <td>Artisan Digital Profiles</td>
             <td className="highlight-col check-yes">✓ Portfolio + ratings</td>
-          </tr>
-          <tr>
-            <td>Price Range Selection</td>
-            <td className="highlight-col check-yes">✓ Like Bolt/InDrive</td>
           </tr>
           <tr>
             <td>Nigerian-native Brand</td>

@@ -763,7 +763,7 @@ export default function ArtisansPage() {
                   >
                     Book {selectedProfile.name} Now →
                   </button>
-                  <p className="booking-card-hint">🔒 Secure Escrow payment protection enabled</p>
+                  <p className="booking-card-hint">🔒 Pay artisan directly after job completion</p>
                 </div>
               </div>
             </div>
