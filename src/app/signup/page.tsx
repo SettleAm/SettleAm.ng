@@ -115,9 +115,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleSocialSignup = (provider: string) => {
-    triggerToast(`Signing up with ${provider}…`);
-  };
+
 
   return (
     <>
@@ -129,8 +127,13 @@ export default function SignupPage() {
           --border-focus:rgba(29,176,105,0.6); --card:rgba(14,107,69,0.06); --error:#FF6B6B;
         }
 
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100%; }
+
         .signup-body-wrapper {
           min-height: 100vh;
+          width: 100%;
+          max-width: 100vw;
           font-family: 'DM Sans', sans-serif;
           background: var(--darker);
           color: var(--white);
@@ -302,7 +305,9 @@ export default function SignupPage() {
           background: var(--darker);
           position: relative;
           overflow-y: auto;
+          overflow-x: hidden;
           max-height: 100vh;
+          box-sizing: border-box;
         }
 
         .right::before {
@@ -316,7 +321,7 @@ export default function SignupPage() {
           pointer-events: none;
         }
 
-        .form-wrap { width: 100%; max-width: 440px; padding: 40px 0; animation: fadeUp 0.5s 0.15s ease both; }
+        .form-wrap { width: 100%; max-width: 440px; padding: 40px 0; box-sizing: border-box; animation: fadeUp 0.5s 0.15s ease both; }
 
         .form-header { margin-bottom: 28px; }
 
@@ -331,33 +336,7 @@ export default function SignupPage() {
 
         .form-header p { font-size: 0.9rem; font-weight: 300; color: var(--muted); line-height: 1.5; }
 
-        .or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
 
-        .or-divider::before,
-        .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-        .or-divider span { font-size: 0.78rem; color: var(--muted); }
-
-        .social-login { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
-
-        .social-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 12px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: rgba(250,255,248,0.75);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .social-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(200,232,212,0.3); color: var(--white); }
 
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
@@ -651,12 +630,33 @@ export default function SignupPage() {
         }
 
         @media (max-width: 768px) {
-          .signup-body-wrapper { grid-template-columns: 1fr; overflow: auto; }
-          .left { min-height: auto; padding: 36px 24px 40px; display: none; }
-          .right { min-height: auto; padding: 32px 24px 48px; align-items: flex-start; }
+          .signup-body-wrapper {
+            grid-template-columns: 1fr;
+            overflow-x: hidden;
+            width: 100%;
+          }
+          .left { display: none; }
+          .right {
+            min-height: 100vh;
+            max-height: none;
+            padding: 40px 20px 56px;
+            overflow-x: hidden;
+            align-items: flex-start;
+          }
+          .form-wrap {
+            max-width: 100%;
+            width: 100%;
+            padding: 24px 0;
+          }
           .form-row { grid-template-columns: 1fr; }
           .steps-list { display: none; }
           .hero-h1 { font-size: 1.9rem; letter-spacing: -1px; }
+          .form-header h2 { font-size: 1.55rem; letter-spacing: -0.5px; }
+        }
+
+        @media (max-width: 400px) {
+          .right { padding: 32px 16px 48px; }
+          .form-header h2 { font-size: 1.35rem; }
         }
       ` }} />
 
@@ -781,11 +781,7 @@ export default function SignupPage() {
                 )}
               </div>
 
-              <div className="social-login">
-                <button className="social-btn" onClick={() => handleSocialSignup("Google")}><span>🌐</span> Google</button>
-                <button className="social-btn" onClick={() => handleSocialSignup("Phone")}><span>📱</span> Phone</button>
-              </div>
-              <div className="or-divider"><span>or sign up with email</span></div>
+
 
               <form onSubmit={handleSignup}>
                 <div className="form-row">

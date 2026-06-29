@@ -86,9 +86,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    triggerToast(`Connecting with ${provider}…`);
-  };
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -120,8 +118,13 @@ export default function LoginPage() {
           --error:       #FF6B6B;
         }
 
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100%; }
+
         .login-body-wrapper {
           min-height: 100vh;
+          width: 100%;
+          max-width: 100vw;
           font-family: 'DM Sans', sans-serif;
           background: var(--darker);
           color: var(--white);
@@ -296,7 +299,9 @@ export default function LoginPage() {
           background: var(--darker);
           position: relative;
           overflow-y: auto;
+          overflow-x: hidden;
           max-height: 100vh;
+          box-sizing: border-box;
         }
 
         .right::before {
@@ -311,6 +316,7 @@ export default function LoginPage() {
         .form-wrap {
           width: 100%;
           max-width: 420px;
+          box-sizing: border-box;
           animation: fadeUp 0.5s 0.15s ease both;
         }
 
@@ -334,60 +340,7 @@ export default function LoginPage() {
           line-height: 1.5;
         }
 
-        .or-divider {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin: 24px 0;
-        }
 
-        .or-divider::before,
-        .or-divider::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: var(--border);
-        }
-
-        .or-divider span {
-          font-size: 0.78rem;
-          color: var(--muted);
-          font-weight: 400;
-          letter-spacing: 0.5px;
-        }
-
-        .social-login {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-bottom: 4px;
-        }
-
-        .social-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 12px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: rgba(250,255,248,0.75);
-          cursor: pointer;
-          transition: all 0.2s;
-          text-decoration: none;
-        }
-
-        .social-btn:hover {
-          background: rgba(255,255,255,0.08);
-          border-color: rgba(200,232,212,0.3);
-          color: var(--white);
-        }
-
-        .social-icon { font-size: 1.1rem; }
 
         .form-group {
           margin-bottom: 18px;
@@ -649,19 +602,30 @@ export default function LoginPage() {
         @media (max-width: 768px) {
           .login-body-wrapper {
             grid-template-columns: 1fr;
-            overflow: auto;
+            overflow-x: hidden;
+            width: 100%;
           }
-          .left {
-            min-height: auto;
-            padding: 36px 28px 40px;
-            display: none;
-          }
+          .left { display: none; }
           .right {
-            min-height: auto;
-            padding: 36px 24px 48px;
+            min-height: 100vh;
+            max-height: none;
+            padding: 40px 20px 56px;
+            overflow-x: hidden;
+            align-items: flex-start;
+            justify-content: center;
           }
-          .stats { gap: 28px; }
+          .form-wrap {
+            max-width: 100%;
+            width: 100%;
+          }
+          .form-header h2 { font-size: 1.55rem; letter-spacing: -0.5px; }
+          .stats { gap: 20px; }
           .hero-h1 { font-size: 2rem; }
+        }
+
+        @media (max-width: 400px) {
+          .right { padding: 32px 16px 48px; }
+          .form-header h2 { font-size: 1.35rem; }
         }
       ` }} />
 
@@ -720,17 +684,7 @@ export default function LoginPage() {
               <p>Log in to your artisan dashboard and manage your jobs, bookings, and earnings.</p>
             </div>
 
-            {/* Social login */}
-            <div className="social-login">
-              <button className="social-btn" onClick={() => handleSocialLogin("Google")}>
-                <span className="social-icon">🌐</span> Google
-              </button>
-              <button className="social-btn" onClick={() => handleSocialLogin("Phone")}>
-                <span className="social-icon">📱</span> Phone
-              </button>
-            </div>
 
-            <div className="or-divider"><span>or continue with email</span></div>
 
             <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
               {/* Email */}

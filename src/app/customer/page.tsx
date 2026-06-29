@@ -38,21 +38,6 @@ interface PastJob {
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
-const NEARBY_ARTISANS: Artisan[] = [
-  { id: "1", initials: "AO", avatarClass: "ca-g1", name: "Adewale Okonkwo",  trade: "Electrician",   tradeEmoji: "⚡", experience: "4 yrs exp",  rating: 4.9, reviews: 38, price: "From ₦8,000",  location: "Sagamu",    distance: "2.4km" },
-  { id: "2", initials: "SI", avatarClass: "ca-g2", name: "Suleiman Ibrahim",  trade: "Plumber",       tradeEmoji: "🔧", experience: "6 yrs exp",  rating: 4.8, reviews: 52, price: "From ₦6,500",  location: "Abeokuta",  distance: "1.1km" },
-  { id: "3", initials: "FK", avatarClass: "ca-g3", name: "Funke Kolawole",    trade: "Tailor",        tradeEmoji: "✂️", experience: "8 yrs exp",  rating: 5.0, reviews: 91, price: "From ₦5,000",  location: "Abeokuta",  distance: "0.6km" },
-  { id: "4", initials: "EM", avatarClass: "ca-g4", name: "Emmanuel Musa",     trade: "AC Technician", tradeEmoji: "❄️", experience: "5 yrs exp",  rating: 4.7, reviews: 27, price: "From ₦10,000", location: "Ijebu-Ode", distance: "4.2km" },
-  { id: "5", initials: "RB", avatarClass: "ca-g5", name: "Rasheed Badmus",    trade: "Carpenter",     tradeEmoji: "🪚", experience: "10 yrs exp", rating: 4.9, reviews: 63, price: "From ₦12,000", location: "Sagamu",    distance: "3.0km" },
-  { id: "6", initials: "AT", avatarClass: "ca-g6", name: "Amaka Taiwo",       trade: "Home Cleaner",  tradeEmoji: "🧹", experience: "3 yrs exp",  rating: 4.8, reviews: 44, price: "From ₦4,000",  location: "Abeokuta",  distance: "0.8km" },
-];
-
-const PAST_JOBS: PastJob[] = [
-  { id: "pj1", initials: "AO", avatarClass: "cpj-1", artisanName: "Adewale Okonkwo", trade: "Electrician", description: "Socket repairs + ceiling fan (3 rooms)", price: "₦18,000", date: "May 8, 2026" },
-  { id: "pj2", initials: "FK", avatarClass: "cpj-2", artisanName: "Funke Kolawole",  trade: "Tailor",      description: "Senator suit + 2 shirts (full sewing)",  price: "₦32,000", date: "Apr 20, 2026" },
-  { id: "pj3", initials: "SI", avatarClass: "cpj-3", artisanName: "Suleiman Ibrahim", trade: "Plumber",    description: "Burst pipe repair + new tap fitting",     price: "₦15,500", date: "Mar 5, 2026"  },
-];
-
 const QUICK_FILTERS = [
   ["⚡", "Electrician"], ["🔧", "Plumber"], ["❄️", "AC Tech"],
   ["🪚", "Carpenter"],  ["🧹", "Cleaner"], ["✂️", "Tailor"],
@@ -73,6 +58,8 @@ export default function CustomerHomePage() {
   const [search, setSearch]         = useState("");
   const [heroSearch, setHeroSearch] = useState("");
   const [toast, setToast]           = useState({ visible: false, msg: "" });
+  const [realArtisans, setRealArtisans] = useState<any[]>([]);
+  const [artisansLoading, setArtisansLoading] = useState(true);
 
   const showToast = (msg: string) => {
     setToast({ visible: true, msg });
@@ -121,6 +108,42 @@ export default function CustomerHomePage() {
     }
     checkAuth();
   }, [router]);
+
+  useEffect(() => {
+    async function loadArtisans() {
+      try {
+        const all = await profileService.getAllCustomArtisans();
+        const emojiMap: Record<string, string> = {
+          Electrician: "⚡", Plumber: "🔧", Tailor: "✂️",
+          "AC Tech": "❄️", Carpenter: "🪚", Cleaner: "🧹",
+          "Hair Stylist": "💇", Chef: "👨‍🍳", Painter: "🖌️",
+          Driver: "🚗", "Shoe Maker": "👞",
+        };
+        const artisanProfiles = all
+          .filter(p => p.role === "artisan" && p.first_name)
+          .map((item, index) => ({
+            id: item.id,
+            initials: `${item.first_name[0] || ""}${item.last_name[0] || ""}`.toUpperCase() || "A",
+            avatarClass: `ca-g${(index % 6) + 1}`,
+            name: `${item.first_name} ${item.last_name}`.trim(),
+            trade: item.craft || "Artisan",
+            tradeEmoji: emojiMap[item.craft] || "🛠️",
+            experience: item.experience || "1 yr exp",
+            rating: item.rating || 5.0,
+            reviews: item.reviews || 0,
+            price: item.price || "₦5,000",
+            location: item.location || "Nigeria",
+            profile_image: item.profile_image || "",
+          }));
+        setRealArtisans(artisanProfiles);
+      } catch (err) {
+        console.error("Failed to load artisans:", err);
+      } finally {
+        setArtisansLoading(false);
+      }
+    }
+    loadArtisans();
+  }, []);
 
   if (authLoading) {
     return (
@@ -512,9 +535,7 @@ export default function CustomerHomePage() {
               <h1 className="cu-banner-name">{fullName}</h1>
               <div className="cu-banner-meta">
                 <span className="cu-banner-tag">📍 {locationText}</span>
-                <span className="cu-banner-meta-txt">📋 4 Bookings Made</span>
-                <span className="cu-banner-meta-txt">₦87,500 Total Spent</span>
-                <span className="cu-banner-meta-txt">⭐ 3 Favourites Saved</span>
+                <span className="cu-banner-meta-txt">📋 Customer Account</span>
               </div>
             </div>
           </div>
@@ -563,21 +584,21 @@ export default function CustomerHomePage() {
             <div className="cu-stat">
               <div className="cu-stat-icon g" aria-hidden="true">📋</div>
               <div>
-                <div className="cu-stat-val">4</div>
+                <div className="cu-stat-val">0</div>
                 <div className="cu-stat-lbl">Total bookings made</div>
               </div>
             </div>
             <div className="cu-stat">
               <div className="cu-stat-icon gl" aria-hidden="true">₦</div>
               <div>
-                <div className="cu-stat-val">₦87,500</div>
+                <div className="cu-stat-val">₦0</div>
                 <div className="cu-stat-lbl">Total spent on SettleAm</div>
               </div>
             </div>
             <div className="cu-stat">
               <div className="cu-stat-icon g" aria-hidden="true">⭐</div>
               <div>
-                <div className="cu-stat-val">3</div>
+                <div className="cu-stat-val">0</div>
                 <div className="cu-stat-lbl">Favourite artisans saved</div>
               </div>
             </div>
@@ -593,70 +614,69 @@ export default function CustomerHomePage() {
               <section className="cu-card" aria-label="Past jobs">
                 <div className="cu-card-head">
                   <h2 className="cu-card-title">🕐 Past Jobs</h2>
-                  <button className="cu-card-link" onClick={() => showToast("Full history coming soon")}>View all →</button>
                 </div>
-                {PAST_JOBS.map(job => (
-                  <div
-                    className="cu-pj"
-                    key={job.id}
-                    onClick={() => showToast(`Viewing job with ${job.artisanName}`)}
-                  >
-                    <div className={`cu-pj-av ${job.avatarClass}`}>{job.initials}</div>
-                    <div className="cu-pj-info">
-                      <div className="cu-pj-name">{job.artisanName} — {job.trade}</div>
-                      <div className="cu-pj-desc">{job.description}</div>
-                    </div>
-                    <div className="cu-pj-right">
-                      <div className="cu-pj-price">{job.price}</div>
-                      <div className="cu-pj-date">{job.date}</div>
-                      <button
-                        className="cu-rebook"
-                        onClick={e => { e.stopPropagation(); showToast(`📅 Opening booking form for ${job.artisanName.split(" ")[0]}…`); }}
-                      >
-                        Rebook →
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                <div style={{ textAlign: "center", padding: "32px 0", color: "var(--cu-muted)" }}>
+                  <div style={{ fontSize: "2rem", marginBottom: "10px" }}>📋</div>
+                  <p style={{ fontWeight: 500, fontSize: "0.9rem", color: "var(--cu-dark)", marginBottom: "6px" }}>No jobs yet</p>
+                  <p style={{ fontSize: "0.82rem", fontWeight: 300 }}>Book your first artisan to see your job history here.</p>
+                </div>
               </section>
 
-              {/* NEARBY ARTISANS */}
+              {/* NEARBY ARTISANS — real data from DB */}
               <section className="cu-card" aria-label="Verified artisans near you">
                 <div className="cu-card-head">
                   <h2 className="cu-card-title">📍 Verified Artisans Near You</h2>
                   <Link href="/artisans" className="cu-card-link">See all →</Link>
                 </div>
-                <div className="cu-artisan-grid">
-                  {NEARBY_ARTISANS.map(a => (
-                    <article
-                      className="cu-ac"
-                      key={a.id}
-                      onClick={() => showToast(`📅 Opening booking form for ${a.name.split(" ")[0]}…`)}
-                    >
-                      <div className={`cu-ac-av ${a.avatarClass}`}>
-                        {a.initials}
-                        <div className="cu-vbadge" aria-label="Verified">✓</div>
-                      </div>
-                      <div className="cu-ac-name">{a.name}</div>
-                      <div className="cu-ac-trade">{a.tradeEmoji} {a.trade} · {a.experience}</div>
-                      <div className="cu-ac-meta">
-                        <div className="cu-ac-rating">
-                          <span className="cu-ac-star" aria-hidden="true">★</span>
-                          {a.rating}
-                          <span style={{ color:"var(--cu-muted)", fontWeight:300 }}>({a.reviews})</span>
-                        </div>
-                        <div className="cu-ac-price">{a.price}</div>
-                      </div>
-                      <div className="cu-ac-loc">📍 {a.location} · {a.distance}</div>
-                      <button
-                        className="cu-ac-btn"
-                        onClick={e => { e.stopPropagation(); showToast(`📅 Opening booking form for ${a.name.split(" ")[0]}…`); }}
+
+                {artisansLoading ? (
+                  <div style={{ textAlign: "center", padding: "32px 0", color: "var(--cu-muted)" }}>
+                    <div style={{ fontSize: "1.5rem", marginBottom: "8px" }}>⏳</div>
+                    <p style={{ fontSize: "0.85rem" }}>Loading artisans…</p>
+                  </div>
+                ) : realArtisans.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "32px 0", color: "var(--cu-muted)" }}>
+                    <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🛠️</div>
+                    <p style={{ fontWeight: 500, fontSize: "0.9rem", color: "var(--cu-dark)", marginBottom: "6px" }}>No artisans registered yet</p>
+                    <p style={{ fontSize: "0.82rem", fontWeight: 300 }}>Check back soon — artisans are joining SettleAm every day.</p>
+                  </div>
+                ) : (
+                  <div className="cu-artisan-grid">
+                    {realArtisans.slice(0, 6).map((a, index) => (
+                      <article
+                        className="cu-ac"
+                        key={a.id}
+                        onClick={() => showToast(`📅 Opening booking form for ${a.name.split(" ")[0]}…`)}
                       >
-                        Book Now
-                      </button>
-                    </article>
-                  ))}
-                </div>
+                        <div className={`cu-ac-av ${a.avatarClass}`}>
+                          {a.profile_image ? (
+                            <img src={a.profile_image} alt={a.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+                          ) : (
+                            a.initials
+                          )}
+                          <div className="cu-vbadge" aria-label="Verified">✓</div>
+                        </div>
+                        <div className="cu-ac-name">{a.name}</div>
+                        <div className="cu-ac-trade">{a.tradeEmoji} {a.trade} · {a.experience}</div>
+                        <div className="cu-ac-meta">
+                          <div className="cu-ac-rating">
+                            <span className="cu-ac-star" aria-hidden="true">★</span>
+                            {a.rating.toFixed(1)}
+                            <span style={{ color:"var(--cu-muted)", fontWeight:300 }}>({a.reviews})</span>
+                          </div>
+                          <div className="cu-ac-price">{a.price}</div>
+                        </div>
+                        <div className="cu-ac-loc">📍 {a.location}</div>
+                        <button
+                          className="cu-ac-btn"
+                          onClick={e => { e.stopPropagation(); showToast(`📅 Opening booking form for ${a.name.split(" ")[0]}…`); }}
+                        >
+                          Book Now
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                )}
               </section>
 
             </div>
