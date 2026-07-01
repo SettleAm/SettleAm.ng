@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "../utils/authContext";
 
 export default function Footer() {
+  const { user, loading } = useAuth();
+  const isAuthed = !loading && !!user;
+
   return (
     <footer>
       <div>
@@ -32,10 +38,15 @@ export default function Footer() {
       <div className="footer-links">
         <Link href="/artisans">Services</Link>
         <Link href="/#how">How it Works</Link>
-        <Link href="/#verify">Trust & Safety</Link>
+        <Link href="/#verify">Trust &amp; Safety</Link>
         <Link href="/book">Book Now</Link>
-        <Link href="/login">Login</Link>
-        <Link href="/signup">Join as Artisan</Link>
+        {/* Hide auth links for already-authenticated users */}
+        {!loading && !isAuthed && (
+          <>
+            <Link href="/login">Login</Link>
+            <Link href="/signup">Join as Artisan</Link>
+          </>
+        )}
       </div>
       <p style={{ fontSize: "0.8rem" }}>© 2026 SettleAm. All rights reserved.</p>
     </footer>

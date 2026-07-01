@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "../utils/authContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,9 @@ export default function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, profile, loading } = useAuth();
 
+  const isAuthed = !loading && !!user;
   const isDark   = theme === "dark";
   const isLanding = variant === "landing";
   const isApp     = variant === "app";
@@ -115,14 +118,27 @@ export default function Header({
     </div>
   );
 
+  // ── Resolve dashboard href by role ────────────────────────────────────────
+  const dashHref = profile?.role === "artisan" ? "/dashboard" : "/customer";
+
   // ── Landing nav links (desktop) ───────────────────────────────────────────
   const landingLinks = isLanding && (
     <ul className="app-header__menu" role="list">
       <li><Link href="/artisans"   className="app-header__link">Services</Link></li>
       <li><Link href="#how"        className="app-header__link">How it Works</Link></li>
       <li><Link href="#verify"     className="app-header__link">Trust &amp; Safety</Link></li>
-      <li><Link href="/login"      className="app-header__link app-header__link--login">Login</Link></li>
-      <li><Link href="#booking"    className="app-header__link app-header__link--cta">Book Now</Link></li>
+      {!loading && (
+        isAuthed ? (
+          <li>
+            <Link href={dashHref} className="app-header__link app-header__link--login">
+              My Dashboard
+            </Link>
+          </li>
+        ) : (
+          <li><Link href="/login" className="app-header__link app-header__link--login">Login</Link></li>
+        )
+      )}
+      <li><Link href="#booking" className="app-header__link app-header__link--cta">Book Now</Link></li>
     </ul>
   );
 
@@ -150,10 +166,16 @@ export default function Header({
         <Link href="#verify"   className="app-header__mobile-link" onClick={() => setMobileMenuOpen(false)}>Trust &amp; Safety</Link>
       </div>
 
-      {/* CTA buttons */}
+      {/* CTA buttons — conditional on auth */}
       <div className="app-header__mobile-actions">
         <Link href="#booking" className="app-header__mobile-btn app-header__mobile-btn--primary" onClick={() => setMobileMenuOpen(false)}>Book Now</Link>
-        <Link href="/login"   className="app-header__mobile-btn app-header__mobile-btn--secondary" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+        {!loading && (
+          isAuthed ? (
+            <Link href={dashHref} className="app-header__mobile-btn app-header__mobile-btn--secondary" onClick={() => setMobileMenuOpen(false)}>My Dashboard</Link>
+          ) : (
+            <Link href="/login" className="app-header__mobile-btn app-header__mobile-btn--secondary" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+          )
+        )}
       </div>
     </div>
   );
