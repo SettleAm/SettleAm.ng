@@ -92,6 +92,15 @@ export const profileService = {
         .single();
 
       if (data && !error) {
+        // Try to get cached role as a fallback
+        let cachedRole: 'customer' | 'artisan' | undefined;
+        try {
+          const cached = localStorage.getItem(`artisan_profile_${userId}`);
+          if (cached) {
+            cachedRole = JSON.parse(cached).role;
+          }
+        } catch (e) {}
+
         return {
           id: data.id,
           email: data.email || "",
@@ -108,7 +117,7 @@ export const profileService = {
           portfolio: Array.isArray(data.portfolio) ? data.portfolio : [],
           rating: data.rating || 5.0,
           reviews: data.reviews || 0,
-          role: data.role || "customer",
+          role: data.role || cachedRole || (data.craft ? "artisan" : "customer"),
         };
       }
     } catch (err) {
@@ -181,9 +190,14 @@ export const profileService = {
    */
   async ensureProfileForUser(userId: string, email: string, metadata: any, defaultRole: 'customer' | 'artisan' = 'customer'): Promise<ArtisanProfile> {
     const existing = await this.getProfile(userId);
+    
+    // Resolve the intended role based on metadata, defaultRole, or metadata craft
+    const resolvedRole = metadata?.role || (metadata?.craft ? "artisan" : defaultRole);
+
     if (existing) {
-      if (!existing.role) {
-        existing.role = metadata?.role || defaultRole;
+      // If the existing role is customer, but the metadata/craft suggests it should be artisan, update it.
+      if (!existing.role || (existing.role === "customer" && resolvedRole === "artisan")) {
+        existing.role = resolvedRole;
         await this.saveProfile(existing);
       }
       return existing;

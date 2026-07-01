@@ -37,7 +37,7 @@ export default function Footer() {
         <Link href="/login">Login</Link>
         <Link href="/signup">Join as Artisan</Link>
       </div>
-      <p style={{ fontSize: "0.8rem" }}>© 2025 SettleAm. All rights reserved.</p>
+      <p style={{ fontSize: "0.8rem" }}>© 2026 SettleAm. All rights reserved.</p>
     </footer>
   );
 }
